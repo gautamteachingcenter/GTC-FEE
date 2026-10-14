@@ -573,7 +573,7 @@
             const pass = (document.getElementById('teacher-pass')?.value || "").trim();
             const secretCode = "R1MzNjEzODk="; // GS361389
             
-            // Allow login with or without typing username if password matches GS361389
+            // 
             const isIdValid = (id === "gautam" || id === "");
             const isPassValid = (pass === "GS361389" || btoa(pass) === secretCode);
 
@@ -586,7 +586,7 @@
                 // Navigate directly to teacher dashboard
                 window.location.href = "teacher.html";
             } else {
-                showModal("गलत पासवर्ड", "क्षमा करें, पासवर्ड गलत है। कृपया 'GS361389' दर्ज करें।", true);
+                showModal("WRONG PASSWORD", true);
             }
         }
 
