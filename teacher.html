@@ -5,27 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Teacher Command Dashboard - Gautam Teaching Center</title>
 
-    <!-- STRICT INSTANT ROUTE LOCK: KISI BHI LINK CLICK KO DIRECT INDEX PAR BHEJEGA -->
+    <!-- STRICT INSTANT ROUTE LOCK: UNIFIED CHECK -->
     <script>
         (function enforceInstantRedirect() {
-            // Check if running in editor preview (blob URL) or non-http environment
+            // Check if running in editor preview (blob URL)
             const isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
             if (isSandboxedPreview) {
-                // In sandbox/blob preview, avoid relative location replace which throws SyntaxError in WebKit/Blink
                 return;
             }
 
-            // Check if user has active session AND came directly through index.html login button
+            // Check if user came verified through index.html
             const isAuth = sessionStorage.getItem("teacherLoggedIn");
             const handshake = sessionStorage.getItem("gtc_handshake");
-            const loginTime = sessionStorage.getItem("teacherLoginTime");
-            const now = Date.now();
-            const MAX_TIME = 30 * 60 * 1000; // 30 minutes
 
-            // Agar koi direct link click karega ya WhatsApp se aayega -> INSTANT KICK TO INDEX.HTML
-            if (!isAuth || isAuth !== "true" || !handshake || handshake !== "GTC_VERIFIED_AUTH" || !loginTime || (now - parseInt(loginTime)) > MAX_TIME) {
+            // Agar koi direct link click karega (naye tab ya WhatsApp se bina login) -> INSTANT KICK TO INDEX.HTML
+            if (!isAuth || isAuth !== "true" || !handshake || handshake !== "GTC_VERIFIED_AUTH") {
                 sessionStorage.clear();
-                localStorage.removeItem("teacherLoggedIn");
                 try {
                     const targetUrl = new URL("index.html", window.location.href).href;
                     window.location.replace(targetUrl);
@@ -728,6 +723,12 @@
             } catch (e) {
                 window.location.href = "index.html";
             }
+        }
+
+        function checkTeacherAuth() {
+            const isAuth = sessionStorage.getItem("teacherLoggedIn");
+            const handshake = sessionStorage.getItem("gtc_handshake");
+            return (isAuth === "true" && handshake === "GTC_VERIFIED_AUTH");
         }
 
         function generateDynamicCycles(admissionDateStr) {
@@ -2122,8 +2123,14 @@ ${ePhone} *Help:* +91 8217598939 (Gautam Sir)`;
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            setupDelegatedActionListeners();
-            fetchStudentsFromCloud();
+            // Check session auth seamlessly
+            const isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
+            if (isSandboxedPreview || checkTeacherAuth()) {
+                setupDelegatedActionListeners();
+                fetchStudentsFromCloud();
+            } else {
+                handleLogout();
+            }
         });
     </script>
 </body>
