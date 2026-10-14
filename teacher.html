@@ -8,6 +8,13 @@
     <!-- STRICT INSTANT ROUTE LOCK: KISI BHI LINK CLICK KO DIRECT INDEX PAR BHEJEGA -->
     <script>
         (function enforceInstantRedirect() {
+            // Check if running in editor preview (blob URL) or non-http environment
+            const isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
+            if (isSandboxedPreview) {
+                // In sandbox/blob preview, avoid relative location replace which throws SyntaxError in WebKit/Blink
+                return;
+            }
+
             // Check if user has active session AND came directly through index.html login button
             const isAuth = sessionStorage.getItem("teacherLoggedIn");
             const handshake = sessionStorage.getItem("gtc_handshake");
@@ -19,19 +26,14 @@
             if (!isAuth || isAuth !== "true" || !handshake || handshake !== "GTC_VERIFIED_AUTH" || !loginTime || (now - parseInt(loginTime)) > MAX_TIME) {
                 sessionStorage.clear();
                 localStorage.removeItem("teacherLoggedIn");
-                window.location.replace("index.html");
+                try {
+                    const targetUrl = new URL("index.html", window.location.href).href;
+                    window.location.replace(targetUrl);
+                } catch (e) {
+                    window.location.href = "index.html";
+                }
             }
         })();
-
-        // Tab minimize hote hi ya WhatsApp par wapas jaate hi session auto-destroy ho jayega
-        window.addEventListener("pagehide", function() {
-            sessionStorage.clear();
-        });
-        document.addEventListener("visibilitychange", function() {
-            if (document.visibilityState === "hidden") {
-                sessionStorage.clear();
-            }
-        });
     </script>
     
     <!-- Tailwind CSS CDN -->
@@ -716,7 +718,16 @@
         function handleLogout() {
             sessionStorage.clear();
             localStorage.removeItem("teacherLoggedIn");
-            window.location.replace("index.html");
+            if (window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http')) {
+                showAlert("Logged Out", "Teacher session successfully cleared.");
+                return;
+            }
+            try {
+                const targetUrl = new URL("index.html", window.location.href).href;
+                window.location.replace(targetUrl);
+            } catch (e) {
+                window.location.href = "index.html";
+            }
         }
 
         function generateDynamicCycles(admissionDateStr) {
