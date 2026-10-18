@@ -50,25 +50,9 @@
         .animate-subtle-glow {
             animation: subtlePulse 7s infinite ease-in-out;
         }
-
-        /* Anti-Autofill Bullet Masking for password field without triggering browser credential heuristics */
-        .password-mask {
-            -webkit-text-security: disc !important;
-            text-security: disc !important;
-        }
-        .password-plain {
-            -webkit-text-security: none !important;
-            text-security: none !important;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white bg-grid-pattern relative overflow-x-hidden">
-
-    <!-- HIDDEN DUMMY FORM TO ABSORB AGGRESSIVE BROWSER AUTOFILL -->
-    <form style="opacity: 0; position: absolute; top: -9999px; left: -9999px; height: 0; width: 0; z-index: -1;" autocomplete="off" aria-hidden="true">
-        <input type="text" name="fake_username_trap" tabindex="-1" autocomplete="off">
-        <input type="password" name="fake_password_trap" tabindex="-1" autocomplete="off">
-    </form>
 
     <!-- Ambient Glow Lights -->
     <div class="fixed top-12 -left-28 w-96 h-96 bg-indigo-600/20 rounded-full blur-[130px] pointer-events-none animate-subtle-glow"></div>
@@ -184,26 +168,14 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: LOGIN CARD -->
+            <!-- RIGHT COLUMN: LOGIN CARD (STUDENT ONLY) -->
             <div class="lg:col-span-6 w-full max-w-md mx-auto">
                 <div id="login-container" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative transition-all duration-300">
                     
-                    <!-- Role Toggle Tabs -->
-                    <div id="role-tabs-container" class="hidden flex bg-slate-950 p-1.5 rounded-2xl mb-6 border border-slate-800">
-                        <button type="button" onclick="switchTab('teacher')" id="tab-teacher" class="flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-chalkboard-user"></i>
-                            <span>Teacher Admin</span>
-                        </button>
-                        <button type="button" onclick="switchTab('student')" id="tab-student" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-cyan-600 text-white transition-all shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-user-graduate"></i>
-                            <span>Student Portal</span>
-                        </button>
-                    </div>
-
                     <!-- CARD HEADER -->
                     <div class="text-center mb-6">
-                        <div class="w-13 h-13 sm:w-14 sm:h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-600/30">
-                            <i class="fa-solid fa-user-check"></i>
+                        <div class="w-13 h-13 sm:w-14 sm:h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-600/30">
+                            <i class="fa-solid fa-user-graduate"></i>
                         </div>
                         <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight" id="login-heading">Student Portal Login</h3>
                         <p class="text-slate-400 text-xs sm:text-sm mt-1" id="login-subheading">Apna registered mobile number enter karein</p>
@@ -228,9 +200,6 @@
                                     inputmode="numeric" 
                                     placeholder="10-digit number" 
                                     autocomplete="off"
-                                    readonly
-                                    onfocus="this.removeAttribute('readonly');"
-                                    onpointerdown="this.removeAttribute('readonly');"
                                     class="w-full bg-slate-950/90 border border-slate-800 rounded-2xl pl-20 pr-4 py-3.5 text-white text-base font-bold tracking-wider placeholder:text-slate-600 placeholder:font-medium focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition shadow-inner">
                             </div>
                             <div class="flex justify-between items-center mt-1.5 text-[11px] text-slate-500">
@@ -250,74 +219,13 @@
                         </button>
                     </div>
 
-                    <!-- TEACHER LOGIN FORM -->
-                    <div id="form-teacher" class="space-y-4 hidden">
-                        <div class="bg-indigo-950/40 border border-indigo-500/30 p-3 rounded-2xl text-center text-xs text-indigo-300">
-                            <i class="fa-solid fa-shield-halved mr-1 text-indigo-400"></i> Teacher Command Center Unlocked
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Teacher ID / Username</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                                <input 
-                                    type="text" 
-                                    id="teacher-id" 
-                                    name="gtc_tch_user_clean"
-                                    placeholder="Enter teacher ID" 
-                                    autocomplete="off" 
-                                    readonly
-                                    onfocus="this.removeAttribute('readonly');"
-                                    onpointerdown="this.removeAttribute('readonly');"
-                                    class="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-4 py-3 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500 transition">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Secure Password</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                                <!-- Type text with password-mask class completely defeats browser password autofill -->
-                                <input 
-                                    type="text" 
-                                    id="teacher-pass" 
-                                    name="gtc_tch_pass_clean"
-                                    placeholder="Enter password" 
-                                    autocomplete="off" 
-                                    spellcheck="false"
-                                    readonly
-                                    onfocus="this.removeAttribute('readonly');"
-                                    onpointerdown="this.removeAttribute('readonly');"
-                                    class="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-11 py-3 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500 transition password-mask">
-                                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs p-1">
-                                    <i id="pass-eye-icon" class="fa-solid fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button 
-                            type="button" 
-                            id="btn-teacher-login"
-                            onclick="handleTeacherLogin()" 
-                            class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-600/30 text-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                            <span>Login to Command Center</span>
-                        </button>
-                    </div>
-
-                    <!-- FOOTER & SECRET TRIGGER -->
+                    <!-- FOOTER HELP -->
                     <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
                         <p class="text-xs text-slate-400">
                             Assistance & Inquiries: Gautam Sir at 
-                            <span 
-                                id="secret-trigger-phone" 
-                                class="text-cyan-400 font-extrabold cursor-pointer select-none active:text-cyan-200 transition inline-block px-1 py-0.5 rounded hover:bg-slate-800/60" 
-                                title="Press & hold for 3 seconds for Teacher Mode">
+                            <span class="text-cyan-400 font-extrabold select-none inline-block px-1">
                                 +91 8217598939
                             </span>
-                        </p>
-                        <p id="secret-status-hint" class="text-[10px] font-bold text-indigo-400 mt-2 hidden animate-pulse">
-                            🔓 Teacher Admin Mode Active
                         </p>
                     </div>
 
@@ -369,18 +277,13 @@
         const db = firebase.database();
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Force reset any accidental browser autofill on input fields
             const phoneInput = document.getElementById('student-phone');
             const digitCounter = document.getElementById('phone-digit-count');
-            const teacherIdInput = document.getElementById('teacher-id');
-            const teacherPassInput = document.getElementById('teacher-pass');
 
             if (phoneInput) {
                 phoneInput.value = '';
                 if (digitCounter) digitCounter.innerText = '0/10';
             }
-            if (teacherIdInput) teacherIdInput.value = '';
-            if (teacherPassInput) teacherPassInput.value = '';
 
             const syncStatus = document.getElementById('sync-status');
             const syncScreen = document.getElementById('sync-screen');
@@ -400,15 +303,6 @@
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         handleStudentLogin();
-                    }
-                });
-            }
-
-            if (teacherPassInput) {
-                teacherPassInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleTeacherLogin();
                     }
                 });
             }
@@ -442,98 +336,7 @@
                     syncScreen.style.display = 'none';
                 }, 900);
             });
-
-            setupSecretTrigger();
         });
-
-        function setupSecretTrigger() {
-            const phoneEl = document.getElementById('secret-trigger-phone');
-            const tabsContainer = document.getElementById('role-tabs-container');
-            const hintEl = document.getElementById('secret-status-hint');
-            if (!phoneEl) return;
-
-            let pressTimer = null;
-
-            const triggerUnlock = () => {
-                if (tabsContainer) tabsContainer.classList.remove('hidden');
-                if (hintEl) hintEl.classList.remove('hidden');
-                switchTab('teacher');
-                
-                // Pre-fill teacher ID Gautam for ease
-                const teacherId = document.getElementById('teacher-id');
-                if (teacherId && !teacherId.value) {
-                    teacherId.value = 'Gautam';
-                }
-                const teacherPass = document.getElementById('teacher-pass');
-                if (teacherPass) {
-                    teacherPass.value = '';
-                    teacherPass.focus();
-                }
-
-                try {
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                } catch(e) {}
-            };
-
-            phoneEl.addEventListener('touchstart', (e) => {
-                pressTimer = setTimeout(triggerUnlock, 3000);
-            });
-            phoneEl.addEventListener('touchend', () => {
-                if (pressTimer) clearTimeout(pressTimer);
-            });
-            phoneEl.addEventListener('touchcancel', () => {
-                if (pressTimer) clearTimeout(pressTimer);
-            });
-
-            phoneEl.addEventListener('mousedown', (e) => {
-                pressTimer = setTimeout(triggerUnlock, 3000);
-            });
-            phoneEl.addEventListener('mouseup', () => {
-                if (pressTimer) clearTimeout(pressTimer);
-            });
-            phoneEl.addEventListener('mouseleave', () => {
-                if (pressTimer) clearTimeout(pressTimer);
-            });
-        }
-
-        function switchTab(role) {
-            const tabTeacher = document.getElementById('tab-teacher');
-            const tabStudent = document.getElementById('tab-student');
-            const formTeacher = document.getElementById('form-teacher');
-            const formStudent = document.getElementById('form-student');
-            const heading = document.getElementById('login-heading');
-            const subheading = document.getElementById('login-subheading');
-
-            if (role === 'teacher') {
-                tabTeacher.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-indigo-600 text-white transition-all shadow-md flex items-center justify-center gap-1.5";
-                tabStudent.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5";
-                formTeacher.classList.remove('hidden');
-                formStudent.classList.add('hidden');
-                heading.innerText = "Teacher Admin Access";
-                subheading.innerText = "Authorized Gautam Sir Command Portal";
-            } else {
-                tabStudent.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-cyan-600 text-white transition-all shadow-md flex items-center justify-center gap-1.5";
-                tabTeacher.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5";
-                formStudent.classList.remove('hidden');
-                formTeacher.classList.add('hidden');
-                heading.innerText = "Student Portal Login";
-                subheading.innerText = "Apna registered mobile number enter karein";
-            }
-        }
-
-        function togglePasswordVisibility() {
-            const pass = document.getElementById('teacher-pass');
-            const icon = document.getElementById('pass-eye-icon');
-            if (pass.classList.contains('password-mask')) {
-                pass.classList.remove('password-mask');
-                pass.classList.add('password-plain');
-                icon.className = 'fa-solid fa-eye-slash';
-            } else {
-                pass.classList.remove('password-plain');
-                pass.classList.add('password-mask');
-                icon.className = 'fa-solid fa-eye';
-            }
-        }
 
         function showModal(title, message, isError = true) {
             const modal = document.getElementById('custom-modal');
@@ -565,29 +368,6 @@
             modalBox.classList.remove('scale-100');
             modalBox.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
-        // TEACHER AUTHENTICATION (ROCK-SOLID HANDSHAKE)
-        function handleTeacherLogin() {
-            const id = (document.getElementById('teacher-id')?.value || "").trim().toLowerCase();
-            const pass = (document.getElementById('teacher-pass')?.value || "").trim();
-            const secretCode = "R1MzNjEzODk="; // GS361389
-            
-            // 
-            const isIdValid = (id === "gautam" || id === "");
-            const isPassValid = (pass === "GS361389" || btoa(pass) === secretCode);
-
-            if (isIdValid && isPassValid) {
-                // Set unified session token
-                sessionStorage.setItem("teacherLoggedIn", "true");
-                sessionStorage.setItem("gtc_handshake", "GTC_VERIFIED_AUTH");
-                sessionStorage.setItem("teacherLoginTime", Date.now().toString());
-
-                // Navigate directly to teacher dashboard
-                window.location.href = "teacher.html";
-            } else {
-                showModal("WRONG PASSWORD");
-            }
         }
 
         // STUDENT LOGIN LOGIC
