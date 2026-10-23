@@ -62,6 +62,10 @@
         0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 211, 238, .15); }
         50% { opacity: .66; box-shadow: 0 0 0 4px rgba(34, 211, 238, .08); }
     }
+    @keyframes gtcRunningCardPulse {
+        0%, 100% { box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .10), 0 8px 26px rgba(8, 145, 178, .08); }
+        50% { box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .24), 0 8px 28px rgba(8, 145, 178, .20), 0 0 0 3px rgba(34, 211, 238, .06); }
+    }
     @keyframes gtcSessionPulse {
         0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .08); border-color: rgba(34, 211, 238, .38); }
         50% { box-shadow: 0 0 0 4px rgba(34, 211, 238, .10), 0 0 18px rgba(34, 211, 238, .12); border-color: rgba(34, 211, 238, .85); }
@@ -76,7 +80,7 @@
     }
     .gtc-running-card {
         border-color: rgba(34, 211, 238, .58) !important;
-        box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .10), 0 8px 26px rgba(8, 145, 178, .08);
+        animation: gtcRunningCardPulse 2.4s ease-in-out infinite;
     }
     .gtc-session-active {
         animation: gtcSessionPulse 2.2s ease-in-out infinite;
@@ -982,6 +986,7 @@
     // A monthly cycle becomes due on its next admission-day anniversary.
     // Example: admission 1 Oct => first fee due 1 Nov, never before that date.
     let activeStudentSession = null;
+    let lastDetectedAutoSession = null;
     let studentDataListener = null;
 
     function parseAdmissionDateParts(dateStr) {
@@ -1340,11 +1345,13 @@
         const sessions = getStudentSessions(student);
         const select = document.getElementById('student-session-select');
         select.innerHTML = sessions.map(sess => `<option value="${sess}">Session ${sess}</option>`).join('');
-        let chosenSession = null;
-        try { chosenSession = localStorage.getItem(`gtcStudentSession_${student.id}`); } catch (e) {}
-        if (!sessions.includes(chosenSession)) chosenSession = getCurrentActiveStudentSession(student, sessions);
+        // Open the portal on the date-correct current session by default.
+        // The student can still manually select an older session afterwards.
+        let chosenSession = getCurrentActiveStudentSession(student, sessions);
         if (!sessions.includes(chosenSession)) chosenSession = sessions[0];
+        lastDetectedAutoSession = chosenSession;
         activeStudentSession = chosenSession;
+        try { localStorage.setItem(`gtcStudentSession_${student.id}`, chosenSession); } catch (e) {}
         select.value = chosenSession;
         renderSelectedStudentSession(student, chosenSession);
     }
@@ -1697,6 +1704,31 @@
     }
 
     initPortal();
+
+    // Refresh the running-month status as dates change, even if the portal stays open.
+    // If the annual session rolls over, auto-switch only when the user was on the previous auto session.
+    let gtcLastDateKey = new Date().toDateString();
+    setInterval(() => {
+        if (!currentActiveStudent || !activeStudentSession) return;
+        const now = new Date();
+        const dateKey = now.toDateString();
+        if (dateKey === gtcLastDateKey) return;
+        gtcLastDateKey = dateKey;
+
+        const sessions = getStudentSessions(currentActiveStudent);
+        const autoSessionNow = getCurrentActiveStudentSession(currentActiveStudent, sessions);
+        if (lastDetectedAutoSession && autoSessionNow !== lastDetectedAutoSession) {
+            if (activeStudentSession === lastDetectedAutoSession) {
+                activeStudentSession = autoSessionNow;
+                try { localStorage.setItem(`gtcStudentSession_${currentActiveStudent.id}`, autoSessionNow); } catch (e) {}
+                const selector = document.getElementById('student-session-select');
+                if (selector) selector.value = autoSessionNow;
+            }
+            lastDetectedAutoSession = autoSessionNow;
+        }
+        // Recalculate cycle status daily so the RUNNING badge moves to the next cycle automatically.
+        renderSelectedStudentSession(currentActiveStudent, activeStudentSession);
+    }, 60 * 1000);
 </script>
 </body>
 </html>
