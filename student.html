@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#070b14">
+    <title>Gautam Teaching Center | Student Fee Portal</title>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -48,6 +55,49 @@
     }
     .animate-subtle-glow {
         animation: subtlePulse 8s infinite ease-in-out;
+    }
+
+    /* Professional live-state motion: clearly visible, but not harsh. */
+    @keyframes gtcRunningBlink {
+        0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 211, 238, .15); }
+        50% { opacity: .66; box-shadow: 0 0 0 4px rgba(34, 211, 238, .08); }
+    }
+    @keyframes gtcSessionPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .08); border-color: rgba(34, 211, 238, .38); }
+        50% { box-shadow: 0 0 0 4px rgba(34, 211, 238, .10), 0 0 18px rgba(34, 211, 238, .12); border-color: rgba(34, 211, 238, .85); }
+    }
+    @keyframes gtcSessionTextPulse {
+        0%, 100% { opacity: .82; text-shadow: 0 0 0 rgba(34, 211, 238, 0); }
+        50% { opacity: 1; text-shadow: 0 0 12px rgba(34, 211, 238, .4); }
+    }
+    .gtc-running-badge {
+        animation: gtcRunningBlink 1.35s ease-in-out infinite;
+        will-change: opacity, box-shadow;
+    }
+    .gtc-running-card {
+        border-color: rgba(34, 211, 238, .58) !important;
+        box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .10), 0 8px 26px rgba(8, 145, 178, .08);
+    }
+    .gtc-session-active {
+        animation: gtcSessionPulse 2.2s ease-in-out infinite;
+    }
+    .gtc-session-dot {
+        animation: gtcRunningBlink 1.35s ease-in-out infinite;
+        box-shadow: 0 0 10px rgba(34, 211, 238, .65);
+    }
+    .gtc-header-session {
+        color: #67e8f9 !important;
+        animation: gtcSessionTextPulse 2.2s ease-in-out infinite;
+    }
+    #student-session-select.gtc-session-active {
+        outline: none;
+        border-color: rgba(34, 211, 238, .8) !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .gtc-running-badge, .gtc-running-card, .gtc-session-active,
+        .gtc-session-dot, .gtc-header-session {
+            animation: none !important;
+        }
     }
 
     /* ==========================================================================
@@ -142,6 +192,8 @@
         }
     }
 </style>
+</head>
+<body class="bg-grid-pattern">
 
 
 <!-- Ambient Glow Lights -->
@@ -170,7 +222,7 @@
                     <span class="text-[10px] font-extrabold px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md tracking-wider border border-cyan-500/20">
                         LIVE CLOUD LEDGER
                     </span>
-                    <span class="hidden sm:inline text-[11px] text-slate-500">• Session 2026-27</span>
+                    <span class="hidden sm:inline text-[11px] font-extrabold tracking-wide text-cyan-300 gtc-header-session" id="header-session-label">• Session —</span>
                 </div>
             </div>
         </div>
@@ -299,7 +351,7 @@
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-black text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                Total Pending Dues
+                                <span id="student-dues-label">Session Pending Dues</span>
                             </span>
                             <span class="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-xs">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -322,7 +374,7 @@
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                Advance Credit Balance
+                                <span id="student-advance-label">Session Advance Credit</span>
                             </span>
                             <span class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs">
                                 <i class="fa-solid fa-wallet"></i>
@@ -347,10 +399,16 @@
                     </h3>
                     <p class="text-xs text-slate-400 mt-0.5">Calculated automatically starting from your official admission date</p>
                 </div>
-                <span class="text-[10px] font-black px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full border border-cyan-500/30 tracking-wider flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                    SESSION 2026-27 TRACKER
-                </span>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <label for="student-session-select" class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Fee Session</label>
+                    <select id="student-session-select" onchange="handleStudentSessionChange(this.value)" aria-label="Select fee session" class="gtc-session-active bg-slate-950 border border-cyan-500/40 text-xs font-extrabold text-cyan-300 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400 cursor-pointer">
+                        <option value="">Loading sessions…</option>
+                    </select>
+                    <span id="session-tracker-badge" class="gtc-session-active text-[10px] font-black px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full border border-cyan-500/30 tracking-wider flex items-center gap-2">
+                        <span class="gtc-session-dot w-2 h-2 rounded-full bg-cyan-400"></span>
+                        SESSION TRACKER
+                    </span>
+                </div>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5" id="billing-checklist-grid"></div>
@@ -439,7 +497,7 @@
                 </div>
                 <div class="flex justify-between items-center mt-1 text-[9px] px-1 text-slate-300 font-bold uppercase">
                     <span class="text-amber-400 font-extrabold tracking-widest">STUDENT IDENTITY CARD</span>
-                    <span class="bg-white/10 px-2 py-0.5 rounded">SESSION 2026-27</span>
+                    <span class="bg-white/10 px-2 py-0.5 rounded" id="scan-card-session">SESSION —</span>
                 </div>
             </div>
 
@@ -579,7 +637,7 @@
                 <h3 class="font-black text-sm uppercase text-slate-950 tracking-wider">Gautam Teaching Center</h3>
             </div>
             <span class="text-[9px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full uppercase tracking-widest inline-block mt-0.5">Official Fee Receipt</span>
-            <p class="text-[9.5px] text-slate-500 font-medium mt-1">Session 2026-27 • Gautam Sir Admin</p>
+            <p class="text-[9.5px] text-slate-500 font-medium mt-1"><span id="rcpt-session-label">Session —</span> • Gautam Sir Admin</p>
         </div>
 
         <!-- Slip Biodata & Payment Items -->
@@ -758,6 +816,9 @@
             const phone = params.get('phone') || "";
             const adm = params.get('adm') || "-";
             const studentId = params.get('id');
+            const scanSession = params.get('session') || '—';
+            const scanSessionEl = document.getElementById('scan-card-session');
+            if (scanSessionEl) scanSessionEl.textContent = `SESSION ${scanSession}`;
 
             // Render URL parameters
             document.getElementById('scan-card-name').innerText = name;
@@ -871,6 +932,8 @@
         document.getElementById('scan-card-father').innerText = s.fatherName;
         document.getElementById('scan-card-phone').innerText = s.phone;
         document.getElementById('scan-card-adm').innerText = s.admissionDate || "-";
+        const scanSessionEl = document.getElementById('scan-card-session');
+        if (scanSessionEl) scanSessionEl.textContent = `SESSION ${activeStudentSession || getCurrentActiveStudentSession(s)}`;
 
         const avatarBox = document.getElementById('scan-card-avatar');
         if (s.avatar) {
@@ -915,43 +978,98 @@
         }, 300);
     }
 
-    // 12-MONTH CYCLES GENERATOR
-    function generateDynamicCycles(admissionDateStr) {
-        if(!admissionDateStr) admissionDateStr = "2026-01-26";
-        let parts = admissionDateStr.includes('-') ? admissionDateStr.split('-') : admissionDateStr.split('/');
-        let year, month, day;
-        if (admissionDateStr.includes('-')) {
-            year = parseInt(parts[0]);
-            month = parseInt(parts[1]) - 1;
-            day = parseInt(parts[2]);
-        } else {
-            day = parseInt(parts[0]);
-            month = parseInt(parts[1]) - 1;
-            year = parseInt(parts[2]);
-            if(year < 100) year += 2000;
-        }
+    // SESSION-WISE FEE ENGINE — aligned with the Teacher Dashboard.
+    // A monthly cycle becomes due on its next admission-day anniversary.
+    // Example: admission 1 Oct => first fee due 1 Nov, never before that date.
+    let activeStudentSession = null;
+    let studentDataListener = null;
 
-        let cycles = [];
-        let startDate = new Date(year, month, day);
-        let today = new Date();
+    function parseAdmissionDateParts(dateStr) {
+        const value = String(dateStr || "2026-01-01").trim();
+        let year = 2026, month = 0, day = 1;
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
+            const parts = value.split('-');
+            year = parseInt(parts[0], 10) || 2026;
+            month = (parseInt(parts[1], 10) || 1) - 1;
+            day = parseInt(parts[2], 10) || 1;
+        } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(value)) {
+            const parts = value.split('/');
+            day = parseInt(parts[0], 10) || 1;
+            month = (parseInt(parts[1], 10) || 1) - 1;
+            year = parseInt(parts[2], 10) || 2026;
+            if (year < 100) year += 2000;
+        } else {
+            const parsed = new Date(value);
+            if (!Number.isNaN(parsed.getTime())) {
+                year = parsed.getFullYear(); month = parsed.getMonth(); day = parsed.getDate();
+            }
+        }
+        return { year, month, day };
+    }
+
+    // Keep the same supported session range as the Teacher Dashboard (2024-25 to 2030-31).
+    function makeStudentSessionName(startYear) {
+        const parsed = parseInt(startYear, 10);
+        const y = Math.max(2024, Math.min(2030, Number.isFinite(parsed) ? parsed : new Date().getFullYear()));
+        return `${y}-${String((y + 1) % 100).padStart(2, '0')}`;
+    }
+
+    function getStudentAdmissionSession(student) {
+        return makeStudentSessionName(parseAdmissionDateParts(student?.admissionDate).year);
+    }
+
+    function getStudentSessions(student) {
+        const admissionYear = parseAdmissionDateParts(student?.admissionDate).year;
+        const firstYear = Math.max(2024, Math.min(2030, admissionYear));
+        const sessions = [];
+        for (let year = firstYear; year <= 2030; year++) sessions.push(makeStudentSessionName(year));
+        // Keep any valid, already-recorded session inside the Teacher Dashboard's supported range.
+        const recordedSessions = [
+            ...Object.keys(student?.sessionPaid && typeof student.sessionPaid === 'object' ? student.sessionPaid : {}),
+            ...(Array.isArray(student?.transactions) ? student.transactions : []).map(tx => tx?.session).filter(Boolean)
+        ];
+        recordedSessions.forEach(sess => {
+            const m = String(sess).match(/^(\d{4})-(\d{2})$/);
+            if (!m) return;
+            const year = parseInt(m[1], 10);
+            if (year >= firstYear && year <= 2030) {
+                const normalized = makeStudentSessionName(year);
+                if (!sessions.includes(normalized)) sessions.push(normalized);
+            }
+        });
+        return sessions.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    }
+
+    function dateForAnchoredMonth(year, monthIndex, anchorDay) {
+        const first = new Date(year, monthIndex, 1, 0, 0, 0, 0);
+        const lastDay = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+        return new Date(first.getFullYear(), first.getMonth(), Math.min(anchorDay, lastDay), 0, 0, 0, 0);
+    }
+
+    function generateSession12Cycles(admissionDateStr, sessionStr) {
+        const { year: admissionYear, month, day } = parseAdmissionDateParts(admissionDateStr);
+        const sessionStartYear = parseInt(String(sessionStr || '').split('-')[0], 10) || admissionYear;
+        const actualAdmissionDate = new Date(admissionYear, month, day, 0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const cycles = [];
 
         for (let i = 0; i < 12; i++) {
-            let cycleStart = new Date(startDate.getFullYear(), startDate.getMonth() + i, startDate.getDate());
-            let cycleEnd = new Date(startDate.getFullYear(), startDate.getMonth() + i + 1, startDate.getDate());
-            cycleEnd.setDate(cycleEnd.getDate() - 1);
-
-            let status = "DUE";
-            if (today >= cycleStart && today <= cycleEnd) {
-                status = "RUNNING";
-            } else if (today > cycleEnd) {
-                status = "PAID_OR_OVERDUE";
-            } else {
-                status = "UPCOMING";
-            }
+            const cycleStart = dateForAnchoredMonth(sessionStartYear, month + i, day);
+            const dueDate = dateForAnchoredMonth(sessionStartYear, month + i + 1, day);
+            const cycleEnd = new Date(dueDate.getTime() - 1);
+            let status = 'UPCOMING';
+            if (cycleStart < actualAdmissionDate) status = 'BEFORE_ADMISSION';
+            else if (dueDate <= today) status = 'PAID_OR_OVERDUE';
+            else if (cycleStart <= today && today < dueDate) status = 'RUNNING';
 
             cycles.push({
+                cycleNumber: i + 1,
+                session: sessionStr,
                 title: `${formatDate(cycleStart)} – ${formatDate(cycleEnd)}`,
-                status: status,
+                dueDate,
+                dueDateLabel: formatDate(dueDate),
+                status,
                 startDate: cycleStart,
                 endDate: cycleEnd
             });
@@ -960,38 +1078,192 @@
     }
 
     function formatDate(date) {
-        let d = date.getDate();
-        let m = date.toLocaleString('default', { month: 'short' });
-        let y = date.getFullYear();
+        const d = date.getDate();
+        const m = date.toLocaleString('en-IN', { month: 'short' });
+        const y = date.getFullYear();
         return `${d} ${m} ${y}`;
+    }
+
+    function getStudentSessionPaidMap(student, sessions = getStudentSessions(student)) {
+        const admissionSession = getStudentAdmissionSession(student);
+        const map = {};
+        sessions.forEach(sess => { map[sess] = 0; });
+
+        const savedMap = student?.sessionPaid && typeof student.sessionPaid === 'object' ? student.sessionPaid : null;
+        if (savedMap) {
+            sessions.forEach(sess => {
+                const value = parseInt(savedMap[sess], 10);
+                map[sess] = Number.isFinite(value) && value > 0 ? Math.min(12, value) : 0;
+            });
+            const mappedTotal = Object.values(map).reduce((sum, n) => sum + n, 0);
+            const legacyTotal = Math.max(0, parseInt(student?.paidCycles, 10) || 0);
+            if (mappedTotal === 0 && legacyTotal > 0) {
+                let remaining = legacyTotal;
+                for (const sess of sessions) {
+                    if (remaining <= 0) break;
+                    const take = Math.min(12, remaining);
+                    map[sess] = take;
+                    remaining -= take;
+                }
+            }
+        } else {
+            let remaining = Math.max(0, parseInt(student?.paidCycles, 10) || 0);
+            for (const sess of sessions) {
+                if (remaining <= 0) break;
+                const take = Math.min(12, remaining);
+                map[sess] = take;
+                remaining -= take;
+            }
+        }
+        // Never credit any fee session before the admission session.
+        const admYear = parseAdmissionDateParts(student?.admissionDate).year;
+        sessions.forEach(sess => {
+            const sessYear = parseInt(sess.split('-')[0], 10);
+            if (sessYear < admYear) map[sess] = 0;
+        });
+        return map;
+    }
+
+    function getStudentSessionLedger(student, sessionStr) {
+        const fee = parseInt(student?.monthlyFee, 10) || 150;
+        const sessions = getStudentSessions(student);
+        const sessionPaid = getStudentSessionPaidMap(student, sessions);
+        const cycles = generateSession12Cycles(student?.admissionDate || '2026-01-01', sessionStr);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        const eligibleCycles = cycles.filter(c => c.status !== 'BEFORE_ADMISSION');
+        const expectedCycles = eligibleCycles.filter(c => c.dueDate <= today).length;
+        const paidCycles = Math.max(0, Math.min(12, parseInt(sessionPaid[sessionStr], 10) || 0));
+        const admissionSession = getStudentAdmissionSession(student);
+        const allTransactions = Array.isArray(student?.transactions) ? student.transactions : [];
+        const transactions = allTransactions.filter(tx => tx && (tx.session || admissionSession) === sessionStr);
+        const transactionAmount = transactions.reduce((sum, tx) => sum + (parseInt(tx?.amount, 10) || 0), 0);
+        const creditedAmount = Math.max(transactionAmount, paidCycles * fee);
+        const expectedAmount = expectedCycles * fee;
+        const nextCycle = eligibleCycles.find(c => c.dueDate > today);
+        return {
+            fee, cycles, expectedCycles, paidCycles, expectedAmount, transactionAmount,
+            creditedAmount, balance: expectedAmount - creditedAmount, transactions,
+            nextDueDate: nextCycle ? nextCycle.dueDate : null, sessions
+        };
+    }
+
+    function getCurrentActiveStudentSession(student, sessions = getStudentSessions(student)) {
+        const { year, month, day } = parseAdmissionDateParts(student?.admissionDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const anchorThisYear = dateForAnchoredMonth(today.getFullYear(), month, day);
+        let activeYear = today >= anchorThisYear ? today.getFullYear() : today.getFullYear() - 1;
+        activeYear = Math.max(year, activeYear);
+        const candidate = makeStudentSessionName(activeYear);
+        return sessions.includes(candidate) ? candidate : (sessions[0] || getStudentAdmissionSession(student));
+    }
+
+    function handleStudentSessionChange(sessionStr) {
+        if (!currentActiveStudent) return;
+        const sessions = getStudentSessions(currentActiveStudent);
+        if (!sessions.includes(sessionStr)) return;
+        activeStudentSession = sessionStr;
+        try { localStorage.setItem(`gtcStudentSession_${currentActiveStudent.id}`, sessionStr); } catch (e) {}
+        renderSelectedStudentSession(currentActiveStudent, sessionStr);
+    }
+
+    function renderSelectedStudentSession(student, sessionStr) {
+        const select = document.getElementById('student-session-select');
+        if (select && select.value !== sessionStr) select.value = sessionStr;
+        const ledger = getStudentSessionLedger(student, sessionStr);
+        const paidCount = ledger.paidCycles;
+        const currentLabel = `• Session ${sessionStr}`;
+        const headerSession = document.getElementById('header-session-label');
+        if (headerSession) {
+            headerSession.textContent = currentLabel;
+            headerSession.classList.add('gtc-header-session');
+        }
+        const trackerBadge = document.getElementById('session-tracker-badge');
+        if (trackerBadge) {
+            trackerBadge.classList.add('gtc-session-active');
+            trackerBadge.innerHTML = `<span class="gtc-session-dot w-2 h-2 rounded-full bg-cyan-400"></span> SESSION ${sessionStr} TRACKER`;
+        }
+        if (select) select.classList.add('gtc-session-active');
+
+        const label = document.getElementById('student-dues-label');
+        if (label) label.textContent = `Pending Dues · ${sessionStr}`;
+        const advanceLabel = document.getElementById('student-advance-label');
+        if (advanceLabel) advanceLabel.textContent = `Advance Credit · ${sessionStr}`;
+        document.getElementById('profile-cycles-badge').innerText = `${paidCount} / 12 Cycles Paid`;
+        const progressPercent = Math.min(100, Math.round((paidCount / 12) * 100));
+        document.getElementById('cycle-percentage-text').innerText = `${progressPercent}%`;
+        document.getElementById('cycle-progress-bar').style.width = `${progressPercent}%`;
+
+        const duesEl = document.getElementById('student-dues-display');
+        const advanceEl = document.getElementById('student-advance-display');
+        const duesSubtext = document.getElementById('dues-subtext');
+        if (ledger.balance > 0) {
+            duesEl.innerText = `₹${ledger.balance.toLocaleString('en-IN')}`;
+            advanceEl.innerText = '₹0';
+            duesSubtext.innerText = `${ledger.expectedCycles} monthly cycle(s) have matured in ${sessionStr}; see the cycle cards below.`;
+        } else if (ledger.balance < 0) {
+            duesEl.innerText = '₹0';
+            advanceEl.innerText = `₹${Math.abs(ledger.balance).toLocaleString('en-IN')}`;
+            duesSubtext.innerText = `This session has an advance credit balance.`;
+        } else {
+            duesEl.innerText = '₹0';
+            advanceEl.innerText = '₹0';
+            duesSubtext.innerText = ledger.nextDueDate
+                ? `No fee is due yet. Next fee due date: ${formatDate(ledger.nextDueDate)}.`
+                : `No outstanding fee is recorded for ${sessionStr}.`;
+        }
+
+        const sessionTransactions = ledger.transactions.slice().sort((a, b) => {
+            const da = new Date(a?.timestamp || a?.date || 0).getTime() || 0;
+            const db = new Date(b?.timestamp || b?.date || 0).getTime() || 0;
+            return da - db;
+        });
+        renderChecklist(student, sessionStr, ledger);
+        renderTransactions(sessionTransactions);
+        const scanSession = document.getElementById('scan-card-session');
+        if (scanSession) scanSession.textContent = `SESSION ${sessionStr}`;
     }
 
     function fetchStudentData() {
         if (!studentPhone || studentPhone === "VERIFY_MODE") return;
+        if (!window.firebase || typeof db === 'undefined' || !db) {
+            showAlert("Connection Error", "Firebase load nahi hua. Internet aur Firebase SDK scripts check karke page refresh karein.", true);
+            document.getElementById('unauth-view').classList.remove('hidden');
+            return;
+        }
 
-        db.ref('gtc_students').on('value', (snapshot) => {
-            const students = snapshot.val() || [];
-            globalStudentsList = students.filter(s => String(s.phone).trim() === String(studentPhone).trim());
+        const studentsRef = db.ref('gtc_students');
+        if (studentDataListener) studentsRef.off('value', studentDataListener);
+        studentDataListener = (snapshot) => {
+            const raw = snapshot.val() || [];
+            const students = (Array.isArray(raw) ? raw : Object.values(raw)).filter(Boolean);
+            globalStudentsList = students.filter(s => String(s?.phone || '').trim() === String(studentPhone).trim());
 
             if (globalStudentsList.length === 0) {
+                document.getElementById('dashboard-view').classList.add('hidden');
+                document.getElementById('selection-view').classList.add('hidden');
                 document.getElementById('unauth-view').classList.remove('hidden');
+                showAlert("Student Not Found", "Is mobile number se linked student record nahi mila. Registered number check karein.", true);
                 return;
             }
 
             document.getElementById('unauth-view').classList.add('hidden');
-
             if (globalStudentsList.length > 1) {
-                let selectedId = localStorage.getItem("selectedStudentId");
-                let studentToOpen = globalStudentsList.find(s => s.id === selectedId);
-                
-                if (studentToOpen) {
-                    renderStudentDashboard(studentToOpen);
-                } else {
-                    renderSelectionScreen(globalStudentsList);
-                }
+                const selectedId = localStorage.getItem("selectedStudentId");
+                const studentToOpen = globalStudentsList.find(s => String(s.id) === String(selectedId));
+                if (studentToOpen) renderStudentDashboard(studentToOpen);
+                else renderSelectionScreen(globalStudentsList);
             } else {
                 renderStudentDashboard(globalStudentsList[0]);
             }
+        };
+        studentsRef.on('value', studentDataListener, (error) => {
+            console.error('[GTC Student Portal] Firebase read failed:', error);
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('selection-view').classList.add('hidden');
+            document.getElementById('unauth-view').classList.remove('hidden');
+            showAlert("Firebase Connection Failed", `${error?.message || 'Database read failed'}. Firebase Realtime Database Rules aur registered student details check karein.`, true);
         });
     }
 
@@ -1034,39 +1306,24 @@
 
     function renderStudentDashboard(student) {
         currentActiveStudent = student;
-
         document.getElementById('selection-view').classList.add('hidden');
         document.getElementById('dashboard-view').classList.remove('hidden');
 
-        if (globalStudentsList.length > 1) {
-            document.getElementById('switch-account-btn').classList.remove('hidden');
-        } else {
-            document.getElementById('switch-account-btn').classList.add('hidden');
-        }
+        if (globalStudentsList.length > 1) document.getElementById('switch-account-btn').classList.remove('hidden');
+        else document.getElementById('switch-account-btn').classList.add('hidden');
 
-        document.getElementById('header-student-name').innerText = student.name;
-        
+        const name = student.name || 'Student';
+        document.getElementById('header-student-name').innerText = name;
         const headerInitial = document.getElementById('student-initial');
-        if (student.avatar) {
-            headerInitial.innerHTML = `<img src="${student.avatar}" alt="${student.name}" class="w-full h-full object-cover">`;
-        } else {
-            headerInitial.innerText = student.name.charAt(0);
-        }
+        if (student.avatar) headerInitial.innerHTML = `<img src="${student.avatar}" alt="Student photo" class="w-full h-full object-cover">`;
+        else headerInitial.innerText = name.charAt(0).toUpperCase();
 
-        document.getElementById('profile-name').innerText = student.name;
-        document.getElementById('profile-class').innerText = student.studentClass || "Class 10th";
-        document.getElementById('profile-father').innerText = student.fatherName;
-        document.getElementById('profile-phone').innerText = student.phone;
-        document.getElementById('profile-fee').innerText = student.monthlyFee || 150;
-        document.getElementById('profile-admission').innerText = student.admissionDate || "2026-01-26";
-        
-        const paidCount = student.paidCycles || 0;
-        document.getElementById('profile-cycles-badge').innerText = `${paidCount} / 12 Cycles Paid`;
-
-        // Progress bar update
-        const progressPercent = Math.min(100, Math.round((paidCount / 12) * 100));
-        document.getElementById('cycle-percentage-text').innerText = `${progressPercent}%`;
-        document.getElementById('cycle-progress-bar').style.width = `${progressPercent}%`;
+        document.getElementById('profile-name').innerText = name;
+        document.getElementById('profile-class').innerText = student.studentClass || 'Class 10th';
+        document.getElementById('profile-father').innerText = student.fatherName || '-';
+        document.getElementById('profile-phone').innerText = student.phone || '-';
+        document.getElementById('profile-fee').innerText = parseInt(student.monthlyFee, 10) || 150;
+        document.getElementById('profile-admission').innerText = student.admissionDate || '-';
 
         const avatarImg = document.getElementById('student-avatar-img');
         const avatarText = document.getElementById('student-avatar-text');
@@ -1077,80 +1334,71 @@
         } else {
             avatarImg.classList.add('hidden');
             avatarText.classList.remove('hidden');
-            avatarText.innerText = student.name.charAt(0);
+            avatarText.innerText = name.charAt(0).toUpperCase();
         }
 
-        let cycles = generateDynamicCycles(student.admissionDate || "2026-01-26");
-        let today = new Date();
-        let runningIndex = cycles.findIndex(c => today >= c.startDate && today <= c.endDate);
-        if(runningIndex === -1 && today > cycles[11].endDate) runningIndex = 12;
-        if(runningIndex === -1) runningIndex = 0;
-
-        let expectedTotalFee = runningIndex * (student.monthlyFee || 150);
-        let totalPaidSoFar = (student.transactions || []).reduce((acc, t) => acc + (t.amount || 0), 0);
-        let netBalance = expectedTotalFee - totalPaidSoFar;
-
-        const duesEl = document.getElementById('student-dues-display');
-        const advEl = document.getElementById('student-advance-display');
-        const duesSubtext = document.getElementById('dues-subtext');
-
-        if (netBalance > 0) {
-            duesEl.innerText = `₹${netBalance}`;
-            advEl.innerText = `₹0`;
-            duesSubtext.innerText = `${Math.ceil(netBalance / (student.monthlyFee || 150))} Month(s) pending fee payment`;
-        } else if (netBalance < 0) {
-            duesEl.innerText = `₹0`;
-            advEl.innerText = `₹${Math.abs(netBalance)}`;
-            duesSubtext.innerText = `All current month dues are fully settled! ✓`;
-        } else {
-            duesEl.innerText = `₹0`;
-            advEl.innerText = `₹0`;
-            duesSubtext.innerText = `All current month dues are fully settled! ✓`;
-        }
-
-        renderChecklist(student.admissionDate || "2026-01-26", paidCount);
-        renderTransactions(student.transactions || []);
+        const sessions = getStudentSessions(student);
+        const select = document.getElementById('student-session-select');
+        select.innerHTML = sessions.map(sess => `<option value="${sess}">Session ${sess}</option>`).join('');
+        let chosenSession = null;
+        try { chosenSession = localStorage.getItem(`gtcStudentSession_${student.id}`); } catch (e) {}
+        if (!sessions.includes(chosenSession)) chosenSession = getCurrentActiveStudentSession(student, sessions);
+        if (!sessions.includes(chosenSession)) chosenSession = sessions[0];
+        activeStudentSession = chosenSession;
+        select.value = chosenSession;
+        renderSelectedStudentSession(student, chosenSession);
     }
 
-    function renderChecklist(admissionDate, paidCount) {
+    function renderChecklist(student, sessionStr, ledger) {
         const grid = document.getElementById('billing-checklist-grid');
-        let cycles = generateDynamicCycles(admissionDate);
+        const cycles = ledger?.cycles || generateSession12Cycles(student.admissionDate || '2026-01-01', sessionStr);
+        const paidCount = ledger?.paidCycles || 0;
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        let html = '';
 
-        let html = "";
-        cycles.forEach((c, index) => {
-            let cardStyle = "bg-slate-950/70 border-slate-800 text-slate-300";
+        cycles.forEach((cycle, index) => {
+            const isBeforeAdmission = cycle.status === 'BEFORE_ADMISSION';
+            const isPaid = !isBeforeAdmission && index < paidCount;
+            const isDue = !isBeforeAdmission && cycle.dueDate <= today;
+            let cardStyle = 'bg-slate-950/70 border-slate-800 text-slate-300';
             let badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">UPCOMING</span>`;
             let icon = `<i class="fa-regular fa-clock text-slate-500"></i>`;
 
-            if (index < paidCount) {
-                cardStyle = "bg-emerald-950/20 border-emerald-500/30 text-emerald-200";
+            if (isBeforeAdmission) {
+                cardStyle = 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-70';
+                badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">BEFORE ADMISSION</span>`;
+                icon = `<i class="fa-solid fa-ban text-slate-600"></i>`;
+            } else if (isPaid) {
+                cardStyle = 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200';
                 badge = `<span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wider">✓ PAID</span>`;
                 icon = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>`;
-            } else if (c.status === "RUNNING") {
-                cardStyle = "bg-cyan-950/30 border-cyan-500/50 text-cyan-200 ring-1 ring-cyan-500/30";
-                badge = `<span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 animate-pulse tracking-wider">⚡ RUNNING</span>`;
-                icon = `<i class="fa-solid fa-bolt text-cyan-400 text-base"></i>`;
-            } else if (index >= paidCount && c.status === "PAID_OR_OVERDUE") {
-                cardStyle = "bg-rose-950/25 border-rose-500/35 text-rose-200";
+            } else if (isDue) {
+                cardStyle = 'bg-rose-950/25 border-rose-500/35 text-rose-200';
                 badge = `<span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 tracking-wider">⚠ DUE</span>`;
                 icon = `<i class="fa-solid fa-circle-exclamation text-rose-400 text-base"></i>`;
+            } else if (cycle.status === 'RUNNING') {
+                cardStyle = 'bg-cyan-950/30 border-cyan-500/50 text-cyan-200 ring-1 ring-cyan-500/30';
+                badge = `<span class="gtc-running-badge inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 tracking-wider"><span class="w-1.5 h-1.5 rounded-full bg-slate-950"></span>RUNNING · Due ${cycle.dueDateLabel}</span>`;
+                icon = `<i class="fa-solid fa-bolt text-cyan-400 text-base"></i>`;
+            } else {
+                badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">UPCOMING · Due ${cycle.dueDateLabel}</span>`;
             }
 
             html += `
-                <div class="p-4 rounded-2xl border ${cardStyle} flex flex-col justify-between space-y-3 transition">
+                <div class="p-4 rounded-2xl border ${cardStyle} ${cycle.status === 'RUNNING' && !isPaid && !isDue && !isBeforeAdmission ? 'gtc-running-card' : ''} flex flex-col justify-between space-y-3 transition">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-black uppercase tracking-wider text-slate-300">Cycle ${index + 1}</span>
                         <span>${icon}</span>
                     </div>
                     <div>
-                        <p class="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-snug">${c.title}</p>
+                        <p class="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-snug">${cycle.title}</p>
                     </div>
-                    <div class="pt-2.5 border-t border-slate-800/80 flex justify-between items-center">
+                    <div class="pt-2.5 border-t border-slate-800/80 flex justify-between items-center gap-2">
                         <span class="text-[11px] font-bold text-slate-400 uppercase">Status</span>
-                        <div>${badge}</div>
+                        <div class="text-right">${badge}</div>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
         grid.innerHTML = html;
     }
@@ -1219,7 +1467,10 @@
         document.getElementById('rcpt-name').innerText = currentActiveStudent.name;
         document.getElementById('rcpt-class').innerText = currentActiveStudent.studentClass || 'Class 10th';
         document.getElementById('rcpt-father').innerText = currentActiveStudent.fatherName;
-        document.getElementById('rcpt-date').innerText = tx.date;
+        document.getElementById('rcpt-date').innerText = tx.date || '-';
+        const txSession = tx.session || getStudentAdmissionSession(currentActiveStudent);
+        const receiptSessionLabel = document.getElementById('rcpt-session-label');
+        if (receiptSessionLabel) receiptSessionLabel.textContent = `Session ${txSession}`;
         document.getElementById('rcpt-cycles').innerText = tx.cyclesCovered || 'Monthly Fee';
         document.getElementById('rcpt-mode').innerText = tx.mode || 'Online / UPI';
         document.getElementById('rcpt-amount').innerText = `₹${tx.amount}`;
@@ -1267,9 +1518,18 @@
 
     // UPI CHECKOUT MODAL LOGIC
     function openPaymentQR() {
-        const dues = document.getElementById('student-dues-display').innerText.replace('₹', '');
-        const amountVal = parseInt(dues) > 0 ? parseInt(dues) : (currentActiveStudent ? currentActiveStudent.monthlyFee : 150);
-        
+        if (!currentActiveStudent || !activeStudentSession) {
+            showAlert("Student Not Selected", "Pehle student profile aur fee session select karein.", true);
+            return;
+        }
+        const ledger = getStudentSessionLedger(currentActiveStudent, activeStudentSession);
+        const amountVal = Math.max(0, ledger.balance);
+        if (amountVal <= 0) {
+            showAlert("No Fee Due Yet", ledger.nextDueDate
+                ? `Is session ki koi fee abhi due nahi hai. Agli fee ${formatDate(ledger.nextDueDate)} ko due hogi.`
+                : `Is session mein abhi koi pending fee nahi hai.`, false);
+            return;
+        }
         document.getElementById('qr-amount').innerText = amountVal;
 
         const upiString = `upi://pay?pa=8217598939-3@ybl&pn=Gautam%20Teaching%20Center&am=${amountVal}&cu=INR&tn=Fee%20Payment%20${encodeURIComponent(currentActiveStudent ? currentActiveStudent.name : 'Student')}`;
@@ -1358,8 +1618,9 @@
                 const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.82);
 
                 db.ref('gtc_students').once('value').then((snapshot) => {
-                    let students = snapshot.val() || [];
-                    const index = students.findIndex(s => s.id === currentActiveStudent.id);
+                    const rawStudents = snapshot.val() || [];
+                    let students = Array.isArray(rawStudents) ? rawStudents.filter(Boolean) : Object.values(rawStudents).filter(Boolean);
+                    const index = students.findIndex(s => String(s.id) === String(currentActiveStudent.id));
                     if (index !== -1) {
                         students[index].avatar = optimizedBase64;
                         db.ref('gtc_students').set(students).then(() => {
@@ -1389,7 +1650,7 @@
 
     function refreshData() {
         fetchStudentData();
-        showAlert("Live Cloud Sync", "Aapka fee status aur transaction records update ho chuke hain!");
+        showAlert("Live Cloud Sync", "Firebase se latest record mangwaya ja raha hai. Update na aaye to connection error check karein.");
     }
 
     function showAlert(title, message, isError = false) {
@@ -1437,3 +1698,5 @@
 
     initPortal();
 </script>
+</body>
+</html>
