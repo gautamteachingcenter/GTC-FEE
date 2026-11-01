@@ -875,12 +875,15 @@
 
         // Check if student already logged in previously on this browser
         window.addEventListener('DOMContentLoaded', () => {
+            // Clear active session flag when landing on index.html so login/resume is always intentional
+            sessionStorage.removeItem('studentLoggedInSession');
             try {
                 const savedPhone = (localStorage.getItem('studentPhone') || '').replace(/\D/g, '');
                 if (savedPhone.length === 10) {
                     resumePhoneLabel.textContent = `+91 ${savedPhone}`;
                     resumeCard.classList.add('show');
                     resumeOpenBtn.onclick = () => {
+                        sessionStorage.setItem('studentLoggedInSession', 'true');
                         window.location.href = 'student.html';
                     };
                 }
@@ -924,6 +927,7 @@
 
                 if (matched) {
                     localStorage.setItem("studentPhone", phone);
+                    sessionStorage.setItem("studentLoggedInSession", "true");
                     window.location.href = "student.html";
                 } else {
                     showError("Yeh mobile number hamare active student record me nahi mila. Kripya sahi number daalein ya Gautam Sir (+91 8217598939) se sampark karein.");
