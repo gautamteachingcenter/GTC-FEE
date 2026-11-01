@@ -2,817 +2,1741 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#070b14">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
     <title>Gautam Teaching Center | Student Fee Portal</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Firebase Realtime Database SDK (Compat v10.8.0) -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Firebase Realtime Database SDK (Compat v10.8.0) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-<!-- Font Awesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- Google Fonts: Plus Jakarta Sans -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
-<style>
-    body { 
-        font-family: 'Plus Jakarta Sans', sans-serif; 
-        background-color: #070b14;
-        color: #f1f5f9;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Subtle modern grid pattern */
-    .bg-grid-pattern {
-        background-image: radial-gradient(rgba(56, 189, 248, 0.07) 1px, transparent 1px);
-        background-size: 26px 26px;
-    }
-
-    /* Glassmorphism panel */
-    .glass-card {
-        background: rgba(15, 23, 42, 0.75);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-    ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.35); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.65); }
-
-    /* Custom glow animation */
-    @keyframes subtlePulse {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.05); }
-    }
-    .animate-subtle-glow {
-        animation: subtlePulse 8s infinite ease-in-out;
-    }
-
-    /* Professional live-state motion: clearly visible, but not harsh. */
-    @keyframes gtcRunningBlink {
-        0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 211, 238, .15); }
-        50% { opacity: .66; box-shadow: 0 0 0 4px rgba(34, 211, 238, .08); }
-    }
-    @keyframes gtcRunningCardPulse {
-        0%, 100% { box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .10), 0 8px 26px rgba(8, 145, 178, .08); }
-        50% { box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .24), 0 8px 28px rgba(8, 145, 178, .20), 0 0 0 3px rgba(34, 211, 238, .06); }
-    }
-    @keyframes gtcSessionPulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .08); border-color: rgba(34, 211, 238, .38); }
-        50% { box-shadow: 0 0 0 4px rgba(34, 211, 238, .10), 0 0 18px rgba(34, 211, 238, .12); border-color: rgba(34, 211, 238, .85); }
-    }
-    @keyframes gtcSessionTextPulse {
-        0%, 100% { opacity: .82; text-shadow: 0 0 0 rgba(34, 211, 238, 0); }
-        50% { opacity: 1; text-shadow: 0 0 12px rgba(34, 211, 238, .4); }
-    }
-    .gtc-running-badge {
-        animation: gtcRunningBlink 1.35s ease-in-out infinite;
-        will-change: opacity, box-shadow;
-    }
-    .gtc-running-card {
-        border-color: rgba(34, 211, 238, .58) !important;
-        animation: gtcRunningCardPulse 2.4s ease-in-out infinite;
-    }
-    .gtc-session-active {
-        animation: gtcSessionPulse 2.2s ease-in-out infinite;
-    }
-    .gtc-session-dot {
-        animation: gtcRunningBlink 1.35s ease-in-out infinite;
-        box-shadow: 0 0 10px rgba(34, 211, 238, .65);
-    }
-    .gtc-header-session {
-        color: #67e8f9 !important;
-        animation: gtcSessionTextPulse 2.2s ease-in-out infinite;
-    }
-    #student-session-select.gtc-session-active {
-        outline: none;
-        border-color: rgba(34, 211, 238, .8) !important;
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .gtc-running-badge, .gtc-running-card, .gtc-session-active,
-        .gtc-session-dot, .gtc-header-session {
-            animation: none !important;
-        }
-    }
-
-    /* ==========================================================================
-       PRINT ENGINE: DUAL-MODE (SINGLE SLIP vs FULL STATEMENT)
-       ========================================================================== */
-    @media print {
-        body { 
-            background: white !important; 
-            color: #09090b !important; 
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+    <style>
+        /* ==========================================================================
+           HIGH-PERFORMANCE STUDENT ERP SYSTEM (Zero Lag, Clean Professional UI)
+           ========================================================================== */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-muted: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --primary-border: #c7d2fe;
+            --emerald: #059669;
+            --emerald-soft: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --rose: #e11d48;
+            --rose-soft: #fff1f2;
+            --rose-border: #fecdd3;
+            --amber: #d97706;
+            --amber-soft: #fffbeb;
+            --amber-border: #fde68a;
+            --cyan: #0284c7;
+            --cyan-soft: #f0f9ff;
+            --cyan-border: #bae6fd;
+            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 20px 35px -10px rgba(15, 23, 42, 0.18);
         }
 
-        /* --- CASE 1: ONLY SINGLE FEE RECEIPT SLIP PRINTING --- */
-        body.printing-single-slip {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-        }
-        body.printing-single-slip header,
-        body.printing-single-slip main,
-        body.printing-single-slip footer,
-        body.printing-single-slip .no-print,
-        body.printing-single-slip .receipt-slip-no-print,
-        body.printing-single-slip #unauth-view,
-        body.printing-single-slip #selection-view,
-        body.printing-single-slip #custom-alert-modal,
-        body.printing-single-slip #qr-payment-modal,
-        body.printing-single-slip #scanned-id-card-modal { 
-            display: none !important; 
-        }
-        body.printing-single-slip #receipt-modal {
-            display: block !important;
-            position: static !important;
-            background: transparent !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            opacity: 1 !important;
-            width: 100% !important;
-        }
-        body.printing-single-slip #receipt-modal-box {
-            display: block !important;
-            position: relative !important;
-            max-width: 96mm !important;
-            width: 96mm !important;
-            margin: 10mm auto !important;
-            padding: 16px 20px !important;
-            border: 2px dashed #09090b !important;
-            border-radius: 12px !important;
-            background: #ffffff !important;
-            color: #09090b !important;
-            box-shadow: none !important;
-            transform: none !important;
-            page-break-inside: avoid !important;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* --- CASE 2: FULL LEDGER STATEMENT PRINTING --- */
-        body:not(.printing-single-slip) #receipt-modal {
+        html, body {
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, input, select, a {
+            font: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hidden {
             display: none !important;
         }
-        body:not(.printing-single-slip) header,
-        body:not(.printing-single-slip) nav,
-        body:not(.printing-single-slip) .no-print,
-        body:not(.printing-single-slip) button,
-        body:not(.printing-single-slip) #unauth-view,
-        body:not(.printing-single-slip) #custom-alert-modal,
-        body:not(.printing-single-slip) #qr-payment-modal,
-        body:not(.printing-single-slip) #scanned-id-card-modal { 
-            display: none !important; 
+
+        /* Header */
+        .app-header {
+            background: #0f172a;
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 30;
         }
-        body:not(.printing-single-slip) main { 
-            padding: 0 !important; 
-            margin: 0 !important; 
-            max-width: 100% !important; 
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
-        body:not(.printing-single-slip) .print-card { 
-            background: white !important; 
-            border: 1px solid #cbd5e1 !important; 
-            box-shadow: none !important; 
-            color: #09090b !important;
-            page-break-inside: avoid !important;
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 0;
         }
-        body:not(.printing-single-slip) table { 
-            width: 100% !important; 
-            border-collapse: collapse !important; 
+
+        .avatar-hdr {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
         }
-        body:not(.printing-single-slip) th, 
-        body:not(.printing-single-slip) td { 
-            border: 1px solid #cbd5e1 !important; 
-            padding: 8px !important; 
-            color: #09090b !important;
+
+        .avatar-hdr img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-    }
-</style>
+
+        .hdr-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hdr-sub {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .live-tag {
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 5px;
+            background: rgba(16, 185, 129, 0.16);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            letter-spacing: 0.4px;
+        }
+
+        .hdr-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hdr-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        .hdr-btn:hover {
+            background: #334155;
+        }
+
+        .hdr-btn.rose {
+            color: #fda4af;
+            border-color: rgba(244, 63, 94, 0.35);
+        }
+
+        /* Main Workspace */
+        .main-wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 20px 18px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Cards */
+        .erp-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Top Overview Grid */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 16px;
+        }
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .profile-photo-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar {
+            width: 86px;
+            height: 86px;
+            border-radius: 18px;
+            background: var(--primary-soft);
+            border: 2px solid var(--primary-border);
+            color: var(--primary);
+            font-size: 32px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-btn {
+            margin-top: 7px;
+            padding: 4px 9px;
+            border-radius: 7px;
+            font-size: 10.5px;
+            font-weight: 700;
+            border: 1px solid var(--border-strong);
+            background: var(--bg-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .photo-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .student-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .badge-class { background: var(--primary-soft); color: var(--primary); border: 1px solid var(--primary-border); }
+        .badge-adv { background: var(--emerald-soft); color: var(--emerald); border: 1px solid var(--emerald-border); }
+        .badge-due { background: var(--rose-soft); color: var(--rose); border: 1px solid var(--rose-border); }
+        .badge-clear { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan-border); }
+        .badge-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); }
+
+        .meta-list {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px 14px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .meta-list strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .progress-box {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-muted);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--cyan));
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+
+        .profile-actions {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: background 0.15s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-outline {
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-subtle);
+        }
+
+        /* Financial Summary Column */
+        .finance-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ledger-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-label {
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-val {
+            font-size: 23px;
+            font-weight: 800;
+            margin-top: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* 12-Month Cycles Grid */
+        .section-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .select-control {
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border-strong);
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+            font-size: 12.5px;
+            font-weight: 800;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .select-control:focus {
+            border-color: var(--primary);
+        }
+
+        .cycles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .cycle-card {
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: var(--bg-surface);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .cycle-card.paid {
+            background: var(--emerald-soft);
+            border-color: var(--emerald-border);
+        }
+
+        .cycle-card.partial {
+            background: var(--amber-soft);
+            border-color: var(--amber-border);
+        }
+
+        .cycle-card.due {
+            background: var(--rose-soft);
+            border-color: var(--rose-border);
+        }
+
+        .cycle-card.running {
+            background: var(--cyan-soft);
+            border-color: var(--cyan-border);
+        }
+
+        .cycle-card.before {
+            opacity: 0.55;
+            background: var(--bg-subtle);
+        }
+
+        /* Ledger Table */
+        table.erp-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        table.erp-table thead tr {
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table.erp-table th {
+            padding: 11px 14px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--text-muted);
+        }
+
+        table.erp-table td {
+            padding: 12px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table.erp-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mobile-tx-wrap {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Modals */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            overflow-y: auto;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin: auto;
+        }
+
+        @media (max-width: 900px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            .cycles-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .profile-top {
+                flex-direction: column;
+                text-align: center;
+            }
+            .name-row {
+                justify-content: center;
+            }
+            .meta-list {
+                grid-template-columns: 1fr;
+                text-align: left;
+                background: var(--bg-subtle);
+                padding: 10px 12px;
+                border-radius: 10px;
+            }
+            .cycles-grid {
+                grid-template-columns: 1fr;
+            }
+            .desktop-tx-wrap {
+                display: none;
+            }
+            .mobile-tx-wrap {
+                display: flex;
+            }
+        }
+
+        /* ==========================================================================
+           PRINT ENGINE: DUAL-MODE (SINGLE SLIP vs FULL STATEMENT)
+           ========================================================================== */
+        @media print {
+            body {
+                background: white !important;
+                color: #09090b !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* CASE 1: SINGLE RECEIPT SLIP PRINT */
+            body.printing-single-slip header,
+            body.printing-single-slip main,
+            body.printing-single-slip .no-print,
+            body.printing-single-slip .receipt-slip-no-print,
+            body.printing-single-slip #unauth-view,
+            body.printing-single-slip #selection-view,
+            body.printing-single-slip #custom-alert-modal,
+            body.printing-single-slip #qr-payment-modal,
+            body.printing-single-slip #scanned-id-card-modal {
+                display: none !important;
+            }
+            body.printing-single-slip #receipt-modal {
+                display: block !important;
+                position: static !important;
+                background: transparent !important;
+                padding: 0 !important;
+            }
+            body.printing-single-slip #receipt-modal-box {
+                max-width: 96mm !important;
+                width: 96mm !important;
+                margin: 8mm auto !important;
+                padding: 14px 18px !important;
+                border: 2px dashed #09090b !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
+            }
+
+            /* CASE 2: FULL STATEMENT PRINT */
+            body:not(.printing-single-slip) header,
+            body:not(.printing-single-slip) .no-print,
+            body:not(.printing-single-slip) button,
+            body:not(.printing-single-slip) .modal-backdrop {
+                display: none !important;
+            }
+            body:not(.printing-single-slip) .main-wrap {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            body:not(.printing-single-slip) .erp-card,
+            body:not(.printing-single-slip) .stat-box {
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
 </head>
-<body class="bg-grid-pattern">
+<body>
 
+    <!-- TOP NAVIGATION BAR -->
+    <header class="app-header no-print">
+        <div class="header-inner">
+            <div class="header-left">
+                <button type="button" id="switch-account-btn" onclick="goBackToSelection()" class="hdr-btn hidden">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Profiles</span>
+                </button>
 
-<!-- Ambient Glow Lights -->
-<div class="fixed top-12 -left-28 w-96 h-96 bg-indigo-600/15 rounded-full blur-[130px] pointer-events-none animate-subtle-glow no-print"></div>
-<div class="fixed bottom-12 -right-28 w-96 h-96 bg-cyan-500/15 rounded-full blur-[130px] pointer-events-none animate-subtle-glow no-print"></div>
-
-<!-- TOP NAVIGATION BAR -->
-<header class="bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 shadow-xl no-print">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
-        
-        <div class="flex items-center space-x-3">
-            <!-- Multi-Account Switch Back Button -->
-            <button id="switch-account-btn" onclick="goBackToSelection()" class="hidden bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3 py-2 rounded-xl border border-slate-800 text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Profiles</span>
-            </button>
-            
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-cyan-500/20 border border-cyan-400/30 overflow-hidden" id="student-initial">
-                S
-            </div>
-            <div>
-                <h1 class="font-extrabold text-sm sm:text-base text-white tracking-tight leading-tight flex items-center gap-1.5" id="header-student-name">
-                    Student Portal
-                </h1>
-                <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[10px] font-extrabold px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md tracking-wider border border-cyan-500/20">
-                        LIVE CLOUD LEDGER
-                    </span>
-                    <span class="hidden sm:inline text-[11px] font-extrabold tracking-wide text-cyan-300 gtc-header-session" id="header-session-label">• Session —</span>
+                <div class="avatar-hdr" id="student-initial">S</div>
+                <div style="min-width:0;">
+                    <div class="hdr-title" id="header-student-name">Student Fee Portal</div>
+                    <div class="hdr-sub">
+                        <span class="live-tag">LIVE LEDGER</span>
+                        <span id="header-session-label">• Session —</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Header Action Controls -->
-        <div class="flex items-center space-x-2">
-            <button onclick="refreshData()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold transition" title="Refresh Live Data">
-                <i class="fa-solid fa-arrows-rotate text-cyan-400 text-xs"></i>
-                <span>Sync</span>
-            </button>
-            
-            <button onclick="handleLogout()" class="flex items-center space-x-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-rose-500/20">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span class="hidden sm:inline">Logout</span>
-            </button>
-        </div>
-    </div>
-</header>
-
-<!-- MAIN PORTAL BODY -->
-<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 relative z-20">
-    
-    <!-- MULTI-STUDENT ACCOUNT SELECTION SCREEN -->
-    <div id="selection-view" class="hidden space-y-6">
-        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-extrabold uppercase mb-2">
-                    <i class="fa-solid fa-users"></i> Multiple Profiles Linked
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Select Student Profile</h2>
-                <p class="text-sm text-slate-400 mt-1">This registered mobile number has multiple enrolled students. Kripya apna profile chunein:</p>
+            <div class="hdr-actions">
+                <button type="button" onclick="refreshData()" class="hdr-btn" title="Sync Latest Record">
+                    <i class="fa-solid fa-arrows-rotate" style="color:#38bdf8;"></i>
+                    <span>Sync</span>
+                </button>
+                <button type="button" onclick="handleLogout()" class="hdr-btn rose" title="Logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
             </div>
-            <div id="student-list-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
-    </div>
+    </header>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <div id="dashboard-view" class="space-y-6 sm:space-y-8">
-        
-        <!-- TOP ROW: STUDENT PROFILE CARD & FINANCIAL BALANCES -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- LEFT 7 COLS: STUDENT IDENTITY & ACADEMIC CARD -->
-            <div class="lg:col-span-7 glass-card p-6 sm:p-8 rounded-3xl shadow-2xl flex flex-col justify-between relative overflow-hidden print-card">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-5 sm:space-y-0 sm:space-x-6 relative z-10">
-                    
-                    <!-- AVATAR BOX WITH PHOTO UPLOAD TRIGGER -->
-                    <div class="flex flex-col items-center flex-shrink-0 mx-auto sm:mx-0">
-                        <div class="relative cursor-pointer group" onclick="document.getElementById('profile-photo-input').click()" title="Click to upload profile photo">
-                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-cyan-600/30 to-blue-600/30 border-2 border-cyan-500/40 flex items-center justify-center text-4xl font-black text-cyan-400 shadow-xl overflow-hidden group-hover:border-cyan-400 transition" id="student-avatar-box">
-                                <span id="student-avatar-text">👤</span>
-                                <img id="student-avatar-img" class="w-full h-full object-cover hidden" alt="Student Photo">
+    <!-- MAIN PORTAL WORKSPACE -->
+    <main class="main-wrap">
+
+        <!-- MULTI-STUDENT SELECTION VIEW -->
+        <section id="selection-view" class="erp-card hidden">
+            <div style="margin-bottom:14px;">
+                <span class="badge badge-clear" style="margin-bottom:6px;"><i class="fa-solid fa-users"></i> Multiple Profiles Found</span>
+                <h2 style="font-size:20px;font-weight:800;">Select Your Student Profile</h2>
+                <p style="font-size:12.5px;color:var(--text-muted);margin-top:2px;">Is mobile number par ek se zyada students registered hain. Apna naam chunein:</p>
+            </div>
+            <div id="student-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
+        </section>
+
+        <!-- STUDENT DASHBOARD VIEW -->
+        <div id="dashboard-view" style="display:flex;flex-direction:column;gap:18px;">
+
+            <!-- TOP OVERVIEW: PROFILE + 4-STAT FINANCIAL LEDGER -->
+            <div class="overview-grid">
+
+                <!-- Student Identity Card -->
+                <div class="erp-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+                    <div>
+                        <div class="profile-top">
+                            <div class="profile-photo-wrap">
+                                <div class="profile-avatar" onclick="document.getElementById('profile-photo-input').click()" title="Tap to change photo">
+                                    <span id="student-avatar-text">S</span>
+                                    <img id="student-avatar-img" class="hidden" alt="Student">
+                                </div>
+                                <button type="button" onclick="document.getElementById('profile-photo-input').click()" class="photo-btn no-print">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <span>Change Photo</span>
+                                </button>
+                                <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(event)">
                             </div>
-                            <div class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center text-sm font-black shadow-lg ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-camera"></i>
+
+                            <div class="profile-info">
+                                <div class="name-row">
+                                    <h2 class="student-title" id="profile-name">Student Name</h2>
+                                    <span class="badge badge-class" id="profile-class">Class 10th</span>
+                                    <span class="badge badge-clear font-mono-code" id="profile-roll">GTC-00000</span>
+                                </div>
+
+                                <div class="meta-list">
+                                    <div>Father: <strong id="profile-father">-</strong></div>
+                                    <div>Mobile: <strong id="profile-phone">-</strong></div>
+                                    <div>Admission: <strong id="profile-admission">-</strong></div>
+                                    <div>Monthly Fee: <strong style="color:var(--primary);">₹<span id="profile-fee">150</span>/mo</strong></div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <button type="button" onclick="document.getElementById('profile-photo-input').click()" class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-[11px] font-bold border border-cyan-500/30 transition no-print">
-                            <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-                            <span>Change Photo</span>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-box">
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;">
+                                <span id="profile-cycles-badge" style="color:var(--text-secondary);">0 / 12 Cycles Paid</span>
+                                <span id="cycle-percentage-text" style="color:var(--primary);">0%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div id="cycle-progress-bar" class="progress-fill" style="width:0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions no-print">
+                        <button type="button" onclick="openScannedIDPreview()" class="btn-primary" style="flex:1;">
+                            <i class="fa-solid fa-id-card"></i>
+                            <span>Digital ID Card</span>
                         </button>
-                        <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(event)">
-                    </div>
-
-                    <!-- STUDENT BIODATA INFO -->
-                    <div class="space-y-2 text-center sm:text-left w-full min-w-0">
-                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight truncate" id="profile-name">Student Name</h2>
-                            <span class="px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" id="profile-class">Class 10th</span>
-                        </div>
-
-                        <p class="text-xs sm:text-sm text-slate-300 font-semibold">
-                            Father's Name: <span id="profile-father" class="font-bold text-white">-</span>
-                        </p>
-                        
-                        <p class="text-xs text-slate-400 font-medium flex flex-wrap justify-center sm:justify-start gap-2 items-center">
-                            <span><i class="fa-solid fa-phone text-[10px] text-cyan-400 mr-1"></i><span id="profile-phone" class="font-bold text-slate-200">-</span></span>
-                            <span>•</span>
-                            <span><i class="fa-solid fa-calendar-check text-[10px] text-slate-400 mr-1"></i>Adm: <span id="profile-admission" class="font-bold text-slate-200">-</span></span>
-                        </p>
-
-                        <!-- Academic Progress & Rate Badges -->
-                        <div class="pt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black bg-slate-950/80 text-cyan-300 border border-cyan-500/30">
-                                <i class="fa-solid fa-tag mr-1.5 text-xs text-cyan-400"></i>₹<span id="profile-fee">150</span>/mo Fee
-                            </span>
-                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black bg-cyan-500/10 text-cyan-300 border border-cyan-500/30" id="profile-cycles-badge">
-                                0 / 12 Cycles Paid
-                            </span>
-                        </div>
-
-                        <!-- Academic Year Progress Bar -->
-                        <div class="pt-2">
-                            <div class="flex justify-between text-[11px] font-bold text-slate-400 mb-1">
-                                <span>Session Progress</span>
-                                <span id="cycle-percentage-text" class="text-cyan-400">0%</span>
-                            </div>
-                            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                                <div id="cycle-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 transition-all duration-500 rounded-full" style="width: 0%;"></div>
-                            </div>
-                        </div>
+                        <button type="button" onclick="printFullStatement()" class="btn-outline" style="flex:1;">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Print Statement</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Action Bar inside profile card -->
-                <div class="flex flex-wrap items-center gap-2.5 pt-5 mt-5 border-t border-slate-800/80 relative z-10 no-print">
-                    <button onclick="openScannedIDPreview()" class="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-id-card"></i>
-                        <span>View Digital ID Card</span>
-                    </button>
-                    <button onclick="printFullStatement()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl font-bold text-xs transition border border-slate-700 flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-print"></i>
-                        <span>Print Full Statement</span>
-                    </button>
-                </div>
-            </div>
+                <!-- Right Column: Exact Financial Breakdown -->
+                <div class="finance-col">
+                    <div class="ledger-mini-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">
+                                <span>Fee Due Till Date</span>
+                                <i class="fa-solid fa-calendar-check" style="color:var(--text-muted);"></i>
+                            </div>
+                            <div class="stat-val" id="student-expected-display">₹0</div>
+                            <div class="stat-sub" id="student-expected-sub">0 completed cycles</div>
+                        </div>
 
-            <!-- RIGHT 5 COLS: DUES & ADVANCE CARDS -->
-            <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                
-                <!-- PENDING DUES CARD -->
-                <div class="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col justify-between print-card relative overflow-hidden">
-                    <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-black text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                <span id="student-dues-label">Session Pending Dues</span>
-                            </span>
-                            <span class="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-xs">
+                        <div class="stat-box">
+                            <div class="stat-label" style="color:var(--emerald);">
+                                <span>Total Paid / Credited</span>
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div class="stat-val" style="color:var(--emerald);" id="student-credited-display">₹0</div>
+                            <div class="stat-sub" id="student-credited-sub">Verified receipts</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-label" style="color:var(--rose);">
+                                <span id="student-dues-label">Pending Dues</span>
                                 <i class="fa-solid fa-triangle-exclamation"></i>
-                            </span>
+                            </div>
+                            <div class="stat-val" style="color:var(--rose);" id="student-dues-display">₹0</div>
+                            <div class="stat-sub" id="dues-subtext">Current status</div>
                         </div>
-                        <h3 class="text-3xl sm:text-4xl font-black text-rose-400 mt-3" id="student-dues-display">₹0</h3>
-                        <p class="text-[11px] text-slate-400 mt-1 font-medium" id="dues-subtext">Clear pending fees to keep records updated</p>
+
+                        <div class="stat-box">
+                            <div class="stat-label" style="color:var(--cyan);">
+                                <span id="student-advance-label">Advance Credit</span>
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div class="stat-val" style="color:var(--cyan);" id="student-advance-display">₹0</div>
+                            <div class="stat-sub">Surplus balance</div>
+                        </div>
                     </div>
 
-                    <button onclick="openPaymentQR()" class="mt-4 w-full bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 hover:from-rose-500 hover:to-rose-400 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs sm:text-sm shadow-lg shadow-rose-600/30 transition flex items-center justify-center gap-2 group active:scale-[0.99] no-print">
-                        <i class="fa-solid fa-bolt text-xs group-hover:scale-110 transition-transform"></i>
-                        <span>Pay Fees Online (UPI / QR)</span>
+                    <button type="button" onclick="openPaymentQR()" class="btn-primary no-print" style="height:46px;background:var(--rose);font-size:13.5px;width:100%;">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Pay Pending Fees Online (UPI / QR)</span>
                     </button>
                 </div>
 
-                <!-- ADVANCE CREDIT BALANCE CARD -->
-                <div class="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col justify-between print-card relative overflow-hidden">
-                    <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            </div>
+
+            <!-- 12-MONTH ACADEMIC BILLING CYCLES -->
+            <section class="erp-card">
+                <div class="section-head">
                     <div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span id="student-advance-label">Session Advance Credit</span>
-                            </span>
-                            <span class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-wallet"></i>
-                            </span>
-                        </div>
-                        <h3 class="text-3xl sm:text-4xl font-black text-emerald-400 mt-3" id="student-advance-display">₹0</h3>
+                        <h3 class="section-title">
+                            <i class="fa-solid fa-calendar-days" style="color:var(--primary);"></i>
+                            <span>12-Month Session Billing Cycles</span>
+                        </h3>
+                        <p style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+                            Har mahina poora hone ke baad due hota hai (Admission date se anchored)
+                        </p>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-3 font-medium">Automatic adjustments towards upcoming cycles</p>
-                </div>
 
-            </div>
-
-        </div>
-
-        <!-- 12-MONTH ACADEMIC BILLING CYCLES CHECKLIST -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl shadow-xl space-y-5 print-card">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-800 gap-2">
-                <div>
-                    <h3 class="font-extrabold text-white text-lg sm:text-xl flex items-center space-x-2.5">
-                        <i class="fa-solid fa-calendar-days text-cyan-400 text-base"></i>
-                        <span>12-Month Academic Billing Cycles</span>
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Calculated automatically starting from your official admission date</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <label for="student-session-select" class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Fee Session</label>
-                    <select id="student-session-select" onchange="handleStudentSessionChange(this.value)" aria-label="Select fee session" class="gtc-session-active bg-slate-950 border border-cyan-500/40 text-xs font-extrabold text-cyan-300 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400 cursor-pointer">
-                        <option value="">Loading sessions…</option>
-                    </select>
-                    <span id="session-tracker-badge" class="gtc-session-active text-[10px] font-black px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full border border-cyan-500/30 tracking-wider flex items-center gap-2">
-                        <span class="gtc-session-dot w-2 h-2 rounded-full bg-cyan-400"></span>
-                        SESSION TRACKER
-                    </span>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5" id="billing-checklist-grid"></div>
-        </div>
-
-        <!-- PAYMENT & TRANSACTION LEDGER -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl shadow-xl space-y-5 print-card">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-800 gap-2">
-                <div>
-                    <h3 class="font-extrabold text-white text-lg sm:text-xl flex items-center space-x-2.5">
-                        <i class="fa-solid fa-receipt text-indigo-400 text-base"></i>
-                        <span>Official Payment & Transaction Ledger</span>
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Verified receipts generated by Gautam Teaching Center</p>
-                </div>
-                <span class="text-xs text-slate-400 font-bold" id="tx-total-count">0 Receipts</span>
-            </div>
-
-            <!-- Desktop Table View -->
-            <div class="hidden sm:block overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-950/70 border-b border-slate-800 text-[11px] uppercase text-slate-400 font-extrabold tracking-wider">
-                            <th class="p-3.5 rounded-l-xl">Receipt ID</th>
-                            <th class="p-3.5">Date & Time</th>
-                            <th class="p-3.5">Cycles Covered</th>
-                            <th class="p-3.5">Amount</th>
-                            <th class="p-3.5">Mode</th>
-                            <th class="p-3.5 text-right rounded-r-xl no-print">Receipt Slip</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transaction-history-body" class="divide-y divide-slate-800/80 text-sm font-semibold">
-                        <tr><td colspan="6" class="p-6 text-center text-slate-500 italic">Connecting ledger records...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Cards for Transactions -->
-            <div id="mobile-tx-list" class="sm:hidden space-y-3"></div>
-        </div>
-
-    </div>
-
-    <!-- FOOTER HELP & INSTITUTE CONTACT -->
-    <div class="glass-card rounded-2xl p-5 text-center text-xs text-slate-400 no-print space-y-1.5 border border-slate-800/80">
-        <p class="font-medium">Kisi bhi sawal ya fee issue ke liye direct contact karein:</p>
-        <p class="font-bold text-white text-sm sm:text-base">
-            <i class="fa-solid fa-phone text-cyan-400 mr-1.5"></i>+91 8217598939 
-            <span class="mx-2 text-slate-600">|</span> 
-            <i class="fa-solid fa-location-dot text-rose-400 mr-1.5"></i>Gautam Teaching Center
-        </p>
-    </div>
-
-</main>
-
-<!-- VERIFIED DIGITAL ID CARD SCAN MODAL (Both QR Verification & In-Portal Preview) -->
-<div id="scanned-id-card-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300 p-4 overflow-y-auto no-print">
-    <div class="max-w-sm w-full my-auto space-y-4 transform scale-95 transition-all duration-300" id="scanned-id-card-box">
-        
-        <div class="text-center space-y-1">
-            <span id="scan-top-status-pill" class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-black tracking-wider uppercase">
-                <i class="fa-solid fa-spinner animate-spin" id="scan-top-status-icon"></i>
-                <span id="scan-top-status-text">VERIFYING WITH CLOUD...</span>
-            </span>
-            <p class="text-[11px] text-slate-400 font-medium">Gautam Teaching Center Official Student Pass</p>
-        </div>
-
-        <!-- Virtual PVC ID Card Visual -->
-        <div class="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-2xl border-2 border-slate-900 select-none relative" id="scan-pvc-card">
-            
-            <!-- Watermark overlay shown only when student is deleted/cancelled -->
-            <div id="scan-cancelled-watermark" class="hidden absolute inset-0 z-30 bg-rose-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-5 text-center">
-                <div class="w-16 h-16 rounded-full bg-rose-600 text-white flex items-center justify-center text-3xl mb-3 shadow-xl ring-4 ring-rose-300/40">
-                    <i class="fa-solid fa-ban"></i>
-                </div>
-                <span class="text-xl font-black text-white tracking-widest uppercase border-y-2 border-rose-400 py-1 px-4 mb-2">CANCELLED</span>
-                <p class="text-xs text-rose-100 font-bold leading-relaxed">Yeh student record database me maujood nahi hai ya delete kar diya gaya hai.</p>
-                <span class="mt-3 text-[10px] font-bold text-rose-300 bg-rose-900/60 px-3 py-1 rounded-full border border-rose-500/40">STATUS: DE-REGISTERED / INACTIVE</span>
-            </div>
-
-            <!-- Card Header -->
-            <div class="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 text-white p-4 text-center border-b-2 border-amber-400" id="scan-card-header">
-                <div class="flex items-center justify-center gap-2">
-                    <span class="text-lg">🎓</span>
-                    <h3 class="font-black text-sm uppercase tracking-wider text-white">Gautam Teaching Center</h3>
-                </div>
-                <div class="flex justify-between items-center mt-1 text-[9px] px-1 text-slate-300 font-bold uppercase">
-                    <span class="text-amber-400 font-extrabold tracking-widest">STUDENT IDENTITY CARD</span>
-                    <span class="bg-white/10 px-2 py-0.5 rounded" id="scan-card-session">SESSION —</span>
-                </div>
-            </div>
-
-            <!-- Card Body -->
-            <div class="p-4 space-y-3">
-                <div class="flex items-center gap-4">
-                    <div class="w-20 h-24 rounded-xl border-2 border-slate-900 overflow-hidden bg-slate-100 flex-shrink-0 flex items-center justify-center shadow-md" id="scan-card-avatar">
-                        <span class="font-black text-3xl text-slate-700">S</span>
-                    </div>
-                    <div class="space-y-1 min-w-0 flex-1 text-xs">
-                        <h4 class="font-black text-base uppercase text-slate-900 truncate" id="scan-card-name">Student Name</h4>
-                        <span class="inline-block bg-indigo-100 text-indigo-900 font-extrabold px-2 py-0.5 rounded text-[10px]" id="scan-card-class">Class 10th</span>
-                        <p class="text-[11px] text-slate-600 pt-0.5 font-medium"><span class="font-bold text-slate-400">FATHER:</span> <b class="text-slate-900" id="scan-card-father">-</b></p>
-                        <p class="text-[11px] text-slate-600 font-medium"><span class="font-bold text-slate-400">MOBILE:</span> <b class="text-slate-900" id="scan-card-phone">-</b></p>
-                        <p class="text-[11px] text-slate-600 font-medium"><span class="font-bold text-slate-400">ADM. DATE:</span> <b class="text-slate-900" id="scan-card-adm">-</b></p>
-                        <p class="text-[10px] text-slate-500 font-mono"><span class="font-bold text-slate-400">ROLL ID:</span> <b class="text-emerald-700 font-bold" id="scan-card-roll">GTC-00000</b></p>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <label for="student-session-select" style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-muted);">Session:</label>
+                        <select id="student-session-select" onchange="handleStudentSessionChange(this.value)" class="select-control"></select>
+                        <span id="session-tracker-badge" class="badge badge-class">SESSION TRACKER</span>
                     </div>
                 </div>
 
-                <!-- Seal Banner -->
-                <div id="scan-seal-banner" class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between text-[10px] transition-colors">
-                    <div class="flex items-center gap-2">
-                        <i id="scan-seal-icon" class="fa-solid fa-shield-halved text-emerald-600 text-base"></i>
-                        <div>
-                            <span id="scan-seal-title" class="font-black text-emerald-950 uppercase block">AUTHENTIC RECORD</span>
-                            <span id="scan-seal-desc" class="text-emerald-700 text-[9px]">Verified on Central Cloud Database</span>
-                        </div>
+                <div id="billing-checklist-grid" class="cycles-grid"></div>
+            </section>
+
+            <!-- PAYMENT & TRANSACTION RECEIPTS LEDGER -->
+            <section class="erp-card">
+                <div class="section-head">
+                    <div>
+                        <h3 class="section-title">
+                            <i class="fa-solid fa-receipt" style="color:var(--emerald);"></i>
+                            <span>Official Payment Receipts History</span>
+                        </h3>
+                        <p style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+                            Verified fee receipts issued by Gautam Teaching Center
+                        </p>
                     </div>
-                    <span id="scan-seal-badge" class="font-black text-emerald-800 text-xs tracking-wider">ACTIVE ✓</span>
+                    <span class="badge badge-adv" id="tx-total-count">0 Receipts</span>
                 </div>
-            </div>
 
-            <!-- Footer with Authorized Signature -->
-            <div class="bg-slate-100 border-t border-slate-300 px-4 py-2 flex items-center justify-between text-[9px]">
-                <div>
-                    <p class="font-extrabold text-slate-900">📞 Helpline: +91 8217598939</p>
-                    <p class="text-slate-500 text-[8px]">Gautam Teaching Center</p>
+                <div class="desktop-tx-wrap" style="overflow-x:auto;">
+                    <table class="erp-table">
+                        <thead>
+                            <tr>
+                                <th>Receipt ID</th>
+                                <th>Session</th>
+                                <th>Date &amp; Time</th>
+                                <th>Details / Cycles Covered</th>
+                                <th>Amount Paid</th>
+                                <th>Mode</th>
+                                <th style="text-align:right;" class="no-print">Slip</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-history-body">
+                            <tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted);">Loading payment records...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="text-right flex flex-col items-end">
-                    <img src="image/signature.png" class="signature-img" style="height: 40px; width: 68px; object-fit: contain;" onerror="if(this.src.indexOf('images/')===-1){this.src='images/signature.png';}else{this.style.display='none';}" alt="Sign">
-                    <span class="text-[8px] font-extrabold text-slate-700 border-t border-slate-900 pt-0.5 mt-0.5">Authorized Signatory</span>
-                </div>
-            </div>
+
+                <div id="mobile-tx-list" class="mobile-tx-wrap"></div>
+            </section>
+
         </div>
 
-        <!-- Modal Action Buttons -->
-        <div class="flex gap-2">
-            <button type="button" onclick="closeScannedCardModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Close Preview</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ONLINE PAYMENT QR MODAL -->
-<div id="qr-payment-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300 p-4 no-print overflow-y-auto">
-    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl text-center transform scale-95 transition-all duration-300 my-auto" id="qr-modal-box">
-        
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-black tracking-wider uppercase mb-3">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span>GTC Verified Online Payment</span>
+        <!-- FOOTER CONTACT -->
+        <div class="erp-card no-print" style="text-align:center;padding:14px;font-size:12.5px;color:var(--text-muted);">
+            Kisi bhi fee ya receipt query ke liye sampark karein:
+            <strong style="color:var(--text-primary);margin-left:4px;"><i class="fa-solid fa-phone" style="color:var(--primary);"></i> +91 8217598939 (Gautam Sir)</strong>
         </div>
 
-        <h3 class="text-xl font-black text-white">Direct UPI Payment</h3>
-        <p class="text-xs text-slate-400 mt-1 mb-4">GPay, PhonePe, Paytm ya kisi bhi App se pay karein</p>
-        
-        <!-- Amount Display Card -->
-        <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 mb-4 text-xs sm:text-sm flex items-center justify-between">
-            <div class="text-left">
-                <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Payable Fee:</span>
-                <span class="text-3xl font-black text-emerald-400">₹<span id="qr-amount">0</span></span>
-            </div>
-            <div class="text-right">
-                <span class="text-[10px] uppercase font-bold text-slate-500 block">Recipient</span>
-                <span class="text-xs font-bold text-white">Gautam Teaching Center</span>
-            </div>
-        </div>
+    </main>
 
-        <!-- Direct 1-Tap UPI Launch Button -->
-        <div class="mb-4">
-            <a id="gtc-gpay-link" href="#" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group">
-                <span class="w-6 h-6 rounded-full bg-white text-slate-900 flex items-center justify-center text-xs font-black group-hover:scale-110 transition-transform">
-                    <i class="fa-brands fa-google text-blue-600"></i>
+    <!-- MODAL 1: VERIFIED DIGITAL ID CARD -->
+    <div id="scanned-id-card-modal" class="modal-backdrop no-print">
+        <div style="width:100%;max-width:380px;margin:auto;display:flex;flex-direction:column;gap:12px;">
+            <div style="text-align:center;">
+                <span id="scan-top-status-pill" class="badge badge-adv" style="padding:5px 12px;font-size:11px;">
+                    <i class="fa-solid fa-circle-check" id="scan-top-status-icon"></i>
+                    <span id="scan-top-status-text">VERIFIED OFFICIAL ID PASS</span>
                 </span>
-                <span>Open in Google Pay / PhonePe</span>
-                <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-75"></i>
-            </a>
-        </div>
+            </div>
 
-        <div class="relative flex py-1 items-center mb-4">
-            <div class="flex-grow border-t border-slate-800"></div>
-            <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">YA QR SCAN KAREIN</span>
-            <div class="flex-grow border-t border-slate-800"></div>
-        </div>
-
-        <!-- QR Code Canvas Container -->
-        <div class="bg-white p-3.5 rounded-2xl shadow-inner inline-block mx-auto mb-4 border-2 border-slate-800">
-            <img id="qr-image-tag" src="" alt="UPI QR Code" class="w-44 h-44 rounded-xl mx-auto">
-        </div>
-        
-        <!-- UPI ID Copy Box -->
-        <div class="bg-slate-950 px-4 py-3 rounded-2xl border border-slate-800 mb-4 flex items-center justify-between text-xs">
-            <div class="text-left truncate pr-2">
-                <span class="text-slate-500 text-[10px] uppercase font-bold block">UPI ID:</span>
-                <span class="font-bold text-slate-200 text-xs sm:text-sm font-mono select-all" id="upi-id-text">8217598939-3@ybl</span>
-            </div>
-            <button type="button" onclick="copyUPIId()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 flex-shrink-0" id="copy-btn">
-                <i class="fa-regular fa-copy"></i>
-                <span id="copy-btn-text">Copy</span>
-            </button>
-        </div>
-        
-        <!-- WhatsApp Confirmation CTA -->
-        <div class="bg-emerald-950/30 p-3 rounded-2xl border border-emerald-500/25 text-xs text-emerald-300 mb-4 space-y-2">
-            <p class="text-[11px] font-semibold text-slate-300"><i class="fa-solid fa-camera mr-1.5 text-emerald-400"></i>Payment ke baad screenshot WhatsApp par bhejein:</p>
-            <a id="wa-screenshot-link" href="https://wa.me/918217598939" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
-                <i class="fa-brands fa-whatsapp text-sm"></i>
-                <span>Send Screenshot on WhatsApp</span>
-            </a>
-        </div>
-        
-        <button onclick="closeQRModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-2xl text-xs transition border border-slate-700">
-            Close
-        </button>
-    </div>
-</div>
-
-<!-- SINGLE RECEIPT MODAL (ISOLATED FEE SLIP - PRINTS ONLY THIS SLIP) -->
-<div id="receipt-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300 p-4 overflow-y-auto">
-    <div class="bg-white text-slate-900 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl space-y-4 transform scale-95 transition-all duration-300 my-auto text-left relative" id="receipt-modal-box">
-        
-        <!-- Slip Header -->
-        <div class="text-center border-b pb-3 border-slate-200">
-            <div class="flex items-center justify-center gap-1.5 mb-0.5">
-                <span class="text-sm">🎓</span>
-                <h3 class="font-black text-sm uppercase text-slate-950 tracking-wider">Gautam Teaching Center</h3>
-            </div>
-            <span class="text-[9px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full uppercase tracking-widest inline-block mt-0.5">Official Fee Receipt</span>
-            <p class="text-[9.5px] text-slate-500 font-medium mt-1"><span id="rcpt-session-label">Session —</span> • Gautam Sir Admin</p>
-        </div>
-
-        <!-- Slip Biodata & Payment Items -->
-        <div class="space-y-2 text-xs">
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Receipt No:</span>
-                <span class="font-black text-slate-900 font-mono" id="rcpt-id">-</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Student Name:</span>
-                <span class="font-extrabold text-slate-900" id="rcpt-name">-</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Class:</span>
-                <span class="font-bold text-slate-900" id="rcpt-class">-</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Father's Name:</span>
-                <span class="font-bold text-slate-800" id="rcpt-father">-</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Payment Date:</span>
-                <span class="font-bold text-slate-800" id="rcpt-date">-</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium">Payment Mode:</span>
-                <span class="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]" id="rcpt-mode">Cash / Online</span>
-            </div>
-            <div class="py-1 border-b border-dashed border-slate-200">
-                <span class="text-slate-500 font-medium block mb-0.5">Cycles Covered:</span>
-                <span class="font-bold text-slate-900 block text-[11px] leading-relaxed whitespace-pre-line bg-slate-50 p-1.5 rounded border border-slate-100" id="rcpt-cycles">-</span>
-            </div>
-            <div class="flex justify-between py-2 border-t-2 border-slate-950 text-sm">
-                <span class="font-black text-slate-950 uppercase tracking-wider text-xs flex items-center">Amount Paid:</span>
-                <span class="font-black text-emerald-700 text-lg" id="rcpt-amount">₹0</span>
-            </div>
-        </div>
-
-        <!-- Signature & Helpline Footer -->
-        <div class="border-t border-slate-200 pt-2.5 flex justify-between items-end text-[9px] text-slate-600">
-            <div>
-                <p class="font-bold text-slate-900">📞 Helpline: +91 8217598939</p>
-                <p class="text-slate-500 text-[8px] mt-0.5">Verified System Record</p>
-            </div>
-            <div class="text-right flex flex-col items-end">
-                <img src="image/signature.png" class="signature-img" style="height: 36px; width: auto; max-width: 72px; object-fit: contain;" onerror="if(this.src.indexOf('images/')===-1){this.src='images/signature.png';}else{this.style.display='none';}" alt="Sign">
-                <span class="font-bold text-slate-800 border-t border-slate-900 pt-0.5 mt-0.5 block text-[8px]">Authorized Signatory</span>
-            </div>
-        </div>
-
-        <!-- Modal Action Buttons (Hidden when printed) -->
-        <div class="flex gap-2 pt-2 receipt-slip-no-print">
-            <button type="button" onclick="printReceiptSlip()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md">
-                <i class="fa-solid fa-print"></i>
-                <span>Print Slip</span>
-            </button>
-            <button type="button" onclick="closeReceiptModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2.5 rounded-xl text-xs transition">
-                Close
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- NOTIFICATION ALERT MODAL -->
-<div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300 p-4 no-print">
-    <div class="glass-card rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center transform scale-95 transition-all duration-300" id="alert-modal-box">
-        <div id="alert-icon" class="w-13 h-13 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto mb-3 text-2xl font-bold border border-cyan-500/30">
-            <i class="fa-solid fa-check"></i>
-        </div>
-        <h3 id="alert-title" class="text-base font-bold text-white mb-2">Notice</h3>
-        <p id="alert-message" class="text-slate-400 text-xs leading-relaxed mb-6">Operation completed.</p>
-        <button onclick="closeAlertModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition text-xs border border-slate-700">
-            OK
-        </button>
-    </div>
-</div>
-
-<!-- UNAUTH / INLINE LOGIN MODAL (Protected Direct Route Fallback) -->
-<div id="unauth-view" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="glass-card p-7 sm:p-9 rounded-3xl max-w-md w-full text-center shadow-2xl space-y-5">
-        <div class="w-16 h-16 bg-cyan-500/10 text-cyan-400 rounded-3xl flex items-center justify-center mx-auto text-3xl border border-cyan-500/20 shadow-inner">
-            <i class="fa-solid fa-user-graduate"></i>
-        </div>
-        <div>
-            <h2 class="text-xl sm:text-2xl font-black text-white">Student Portal Login</h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">Apna 10-digit registered mobile number daalkar portal kholein:</p>
-        </div>
-        <div class="space-y-4 pt-2 text-left">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Registered Mobile Number</label>
-                <div class="relative">
-                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-slate-500 text-xs font-bold select-none border-r border-slate-800 pr-2">
-                        <span>+91</span>
+            <div style="background:#ffffff;color:#0f172a;border-radius:20px;overflow:hidden;border:2px solid #0f172a;box-shadow:var(--shadow-lg);position:relative;">
+                <!-- Cancelled Watermark if deleted -->
+                <div id="scan-cancelled-watermark" class="hidden" style="position:absolute;inset:0;z-index:20;background:rgba(136,19,55,0.92);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;">
+                    <div style="width:54px;height:54px;border-radius:50%;background:#e11d48;display:grid;place-items:center;font-size:24px;margin-bottom:10px;">
+                        <i class="fa-solid fa-ban"></i>
                     </div>
-                    <input type="tel" id="inline-student-phone" maxlength="10" placeholder="10-digit number" class="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-16 pr-4 py-3.5 text-white text-base font-bold tracking-wider focus:outline-none focus:border-cyan-500">
+                    <strong style="font-size:18px;letter-spacing:1.5px;border-top:2px solid #fda4af;border-bottom:2px solid #fda4af;padding:3px 12px;">CANCELLED / INACTIVE</strong>
+                    <p style="font-size:12px;margin-top:8px;color:#ffe4e6;">Yeh student record active database me nahi hai.</p>
+                </div>
+
+                <div style="background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;padding:12px 14px;text-align:center;border-bottom:3px solid #f59e0b;">
+                    <div style="font-weight:800;font-size:14px;letter-spacing:0.5px;">🎓 GAUTAM TEACHING CENTER</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:9.5px;margin-top:4px;color:#fde047;font-weight:800;">
+                        <span>STUDENT IDENTITY CARD</span>
+                        <span id="scan-card-session" style="background:rgba(255,255,255,0.18);color:#fff;padding:1px 7px;border-radius:4px;">SESSION —</span>
+                    </div>
+                </div>
+
+                <div style="padding:14px;display:flex;flex-direction:column;gap:12px;">
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <div id="scan-card-avatar" style="width:76px;height:94px;border-radius:10px;border:2px solid #0f172a;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:26px;color:#334155;">
+                            S
+                        </div>
+                        <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;">
+                            <div style="font-weight:800;font-size:15px;color:#0f172a;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="scan-card-name">Student Name</div>
+                            <span id="scan-card-class" class="badge badge-class" style="font-size:10px;padding:1px 6px;margin:2px 0 4px;">Class 10th</span>
+                            <div><span style="color:#64748b;font-weight:700;">FATHER:</span> <strong id="scan-card-father">-</strong></div>
+                            <div><span style="color:#64748b;font-weight:700;">MOBILE:</span> <strong id="scan-card-phone">-</strong></div>
+                            <div><span style="color:#64748b;font-weight:700;">ADM DATE:</span> <strong id="scan-card-adm">-</strong></div>
+                            <div><span style="color:#64748b;font-weight:700;">ROLL ID:</span> <strong id="scan-card-roll" class="font-mono-code" style="color:#047857;">GTC-00000</strong></div>
+                        </div>
+                    </div>
+
+                    <div id="scan-seal-banner" style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:8px 11px;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <i id="scan-seal-icon" class="fa-solid fa-shield-halved" style="color:#059669;font-size:15px;"></i>
+                            <div>
+                                <strong id="scan-seal-title" style="display:block;color:#064e3b;">AUTHENTIC RECORD</strong>
+                                <span id="scan-seal-desc" style="color:#047857;font-size:9.5px;">Verified on Central Cloud Database</span>
+                            </div>
+                        </div>
+                        <strong id="scan-seal-badge" style="color:#065f46;">ACTIVE ✓</strong>
+                    </div>
+                </div>
+
+                <div style="background:#f8fafc;border-top:1px solid #cbd5e1;padding:8px 14px;display:flex;justify-content:space-between;align-items:flex-end;font-size:9.5px;">
+                    <div>
+                        <strong style="color:#0f172a;display:block;">📞 Helpline: +91 8217598939</strong>
+                        <span style="color:#64748b;font-size:8.5px;">Gautam Teaching Center</span>
+                    </div>
+                    <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;">
+                        <img src="signature.png" style="height:32px;width:auto;max-width:72px;object-fit:contain;" onerror="if(this.src.indexOf('image/signature.png')===-1){this.src='image/signature.png';}else if(this.src.indexOf('images/signature.png')===-1){this.src='images/signature.png';}else{this.style.display='none';}" alt="Sign">
+                        <span style="font-size:8px;font-weight:800;color:#1e293b;border-top:1px solid #0f172a;padding-top:1px;margin-top:1px;">Authorized Signatory</span>
+                    </div>
                 </div>
             </div>
-            <button type="button" onclick="handleInlineLogin()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white py-3.5 rounded-2xl font-extrabold text-xs sm:text-sm transition shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
-                <span>Portal Kholein</span>
-            </button>
-            <button type="button" onclick="window.location.href='index.html'" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 rounded-2xl font-bold text-xs transition border border-slate-700 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Go to Home Login Page</span>
+
+            <button type="button" onclick="closeScannedCardModal()" class="btn-outline" style="width:100%;background:#fff;">
+                <i class="fa-solid fa-xmark"></i>
+                <span>Close ID Preview</span>
             </button>
         </div>
     </div>
-</div>
 
-<script>
-    // ROUTE PROTECTION & QUERY CHECKS
-    function checkStudentAuth() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('verify') === '1') {
-            return "VERIFY_MODE";
+    <!-- MODAL 2: ONLINE UPI PAYMENT QR -->
+    <div id="qr-payment-modal" class="modal-backdrop no-print">
+        <div class="modal-dialog" style="padding:22px;text-align:center;">
+            <span class="badge badge-clear" style="margin-bottom:8px;">
+                <i class="fa-solid fa-shield-halved"></i> GTC Verified UPI Payment
+            </span>
+            <h3 style="font-size:18px;font-weight:800;">Pay Coaching Fee Online</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:2px;margin-bottom:14px;">Google Pay, PhonePe, Paytm ya kisi bhi UPI App se pay karein</p>
+
+            <div style="background:var(--bg-subtle);border:1px solid var(--border-color);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="text-align:left;">
+                    <span style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--text-muted);display:block;">Payable Amount</span>
+                    <strong style="font-size:24px;font-weight:800;color:var(--emerald);">₹<span id="qr-amount">0</span></strong>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--text-muted);display:block;">Recipient</span>
+                    <strong style="font-size:12.5px;">Gautam Teaching Center</strong>
+                </div>
+            </div>
+
+            <a id="gtc-gpay-link" href="#" class="btn-primary" style="width:100%;height:44px;margin-bottom:12px;">
+                <i class="fa-brands fa-google-pay" style="font-size:18px;"></i>
+                <span>Open in UPI App (GPay / PhonePe)</span>
+            </a>
+
+            <div style="background:#fff;border:1.5px solid var(--border-color);border-radius:14px;padding:10px;display:inline-block;margin-bottom:12px;">
+                <img id="qr-image-tag" src="" alt="UPI QR" style="width:170px;height:170px;display:block;">
+            </div>
+
+            <div style="background:var(--bg-subtle);border:1px solid var(--border-color);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="text-align:left;">
+                    <span style="font-size:9.5px;font-weight:800;color:var(--text-muted);display:block;">OFFICIAL UPI ID</span>
+                    <strong class="font-mono-code" style="font-size:12.5px;" id="upi-id-text">8217598939-3@ybl</strong>
+                </div>
+                <button type="button" onclick="copyUPIId()" class="btn-outline" style="padding:5px 10px;font-size:11.5px;">
+                    <i class="fa-regular fa-copy"></i>
+                    <span id="copy-btn-text">Copy</span>
+                </button>
+            </div>
+
+            <a id="wa-screenshot-link" href="https://wa.me/918217598939" target="_blank" class="btn-primary" style="width:100%;background:var(--emerald);margin-bottom:8px;">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>Send Payment Screenshot on WhatsApp</span>
+            </a>
+
+            <button type="button" onclick="closeQRModal()" class="btn-outline" style="width:100%;">Close</button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SINGLE RECEIPT SLIP (ISOLATED PRINT) -->
+    <div id="receipt-modal" class="modal-backdrop">
+        <div class="modal-dialog" id="receipt-modal-box" style="max-width:380px;padding:22px;background:#fff;color:#0f172a;">
+            <div style="text-align:center;border-bottom:1.5px solid #e2e8f0;padding-bottom:10px;margin-bottom:12px;">
+                <div style="font-weight:800;font-size:14.5px;text-transform:uppercase;">🎓 Gautam Teaching Center</div>
+                <span class="badge badge-class" style="margin-top:4px;font-size:9.5px;">Official Fee Payment Receipt</span>
+                <div style="font-size:10.5px;color:#64748b;margin-top:4px;"><span id="rcpt-session-label">Session —</span> • Verified Receipt</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Receipt No:</span>
+                    <strong class="font-mono-code" id="rcpt-id">-</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Student Name:</span>
+                    <strong id="rcpt-name">-</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Class:</span>
+                    <strong id="rcpt-class">-</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Father's Name:</span>
+                    <strong id="rcpt-father">-</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Date &amp; Time:</span>
+                    <strong id="rcpt-date">-</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">
+                    <span style="color:#64748b;">Payment Mode:</span>
+                    <strong id="rcpt-mode">-</strong>
+                </div>
+                <div style="border-bottom:1px dashed #e2e8f0;padding-bottom:6px;">
+                    <span style="color:#64748b;display:block;margin-bottom:3px;">Details / Cycles Covered:</span>
+                    <div id="rcpt-cycles" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 8px;font-weight:700;font-size:11px;line-height:1.4;">-</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:2px solid #0f172a;font-size:14px;">
+                    <strong style="text-transform:uppercase;font-size:11.5px;">Amount Paid:</strong>
+                    <strong style="font-size:18px;color:#059669;" id="rcpt-amount">₹0</strong>
+                </div>
+            </div>
+
+            <div style="border-top:1px solid #e2e8f0;margin-top:12px;padding-top:10px;display:flex;justify-content:space-between;align-items:flex-end;font-size:9.5px;color:#64748b;">
+                <div>
+                    <strong style="color:#0f172a;display:block;">📞 Helpline: +91 8217598939</strong>
+                    <span>Verified Cloud Receipt</span>
+                </div>
+                <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;">
+                    <img src="signature.png" style="height:32px;width:auto;max-width:72px;object-fit:contain;" onerror="if(this.src.indexOf('image/signature.png')===-1){this.src='image/signature.png';}else if(this.src.indexOf('images/signature.png')===-1){this.src='images/signature.png';}else{this.style.display='none';}" alt="Sign">
+                    <span style="font-weight:800;color:#0f172a;border-top:1px solid #0f172a;padding-top:1px;margin-top:1px;font-size:8px;">Authorized Signatory</span>
+                </div>
+            </div>
+
+            <div class="receipt-slip-no-print" style="display:flex;gap:8px;margin-top:14px;">
+                <button type="button" onclick="printReceiptSlip()" class="btn-primary" style="flex:1;">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print Slip</span>
+                </button>
+                <button type="button" onclick="closeReceiptModal()" class="btn-outline">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: ALERT -->
+    <div id="custom-alert-modal" class="modal-backdrop no-print">
+        <div class="modal-dialog" style="max-width:360px;padding:22px;text-align:center;">
+            <div id="alert-icon" style="width:46px;height:46px;border-radius:12px;margin:0 auto 10px;display:grid;place-items:center;font-size:18px;background:var(--primary-soft);color:var(--primary);">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="alert-title" style="font-size:16px;font-weight:800;">Notice</h3>
+            <p id="alert-message" style="font-size:12.5px;color:var(--text-muted);margin:6px 0 16px;line-height:1.45;">Completed.</p>
+            <button type="button" onclick="closeAlertModal()" class="btn-primary" style="width:100%;">OK</button>
+        </div>
+    </div>
+
+    <!-- MODAL 5: UNAUTH INLINE LOGIN -->
+    <div id="unauth-view" class="modal-backdrop no-print">
+        <div class="modal-dialog" style="max-width:400px;padding:26px;text-align:center;">
+            <div style="width:52px;height:52px;border-radius:14px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;margin:0 auto 12px;font-size:22px;">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <h2 style="font-size:20px;font-weight:800;">Student Portal Login</h2>
+            <p style="font-size:12.5px;color:var(--text-muted);margin-top:4px;margin-bottom:18px;">Apna 10-digit registered mobile number enter karein:</p>
+
+            <div style="text-align:left;margin-bottom:14px;">
+                <label style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px;">Registered Mobile Number</label>
+                <input
+                    type="tel"
+                    id="inline-student-phone"
+                    maxlength="10"
+                    oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
+                    placeholder="Enter 10-digit mobile number"
+                    style="width:100%;height:44px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border-strong);font-size:15px;font-weight:700;outline:none;">
+            </div>
+
+            <button type="button" onclick="handleInlineLogin()" class="btn-primary" style="width:100%;height:44px;margin-bottom:8px;">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Open Student Portal</span>
+            </button>
+            <button type="button" onclick="window.location.href='index.html'" class="btn-outline" style="width:100%;height:40px;">
+                <span>Back to Login Page</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // ============================================================================
+        // 1. FIREBASE SETUP
+        // ============================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDJnlr-VJt3OqvGeCRIzNCUjhLndpvyoQ",
+            authDomain: "gtc-fee-portal.firebaseapp.com",
+            databaseURL: "https://gtc-fee-portal-default-rtdb.firebaseio.com",
+            projectId: "gtc-fee-portal",
+            storageBucket: "gtc-fee-portal.firebasestorage.app",
+            messagingSenderId: "861357054407",
+            appId: "1:861357054407:web:8d1c8a5dce4c3969c361e2",
+            measurementId: "G-SJWZFVM3YQ"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function makeSessionName(startYear) {
+            return `${startYear}-${String((startYear + 1) % 100).padStart(2, '0')}`;
         }
 
-        const phone = localStorage.getItem("studentPhone");
-        if (!phone) {
-            return null;
+        let SESSIONS_LIST = Array.from({ length: Math.max(1, new Date().getFullYear() + 5 - 2024 + 1) }, (_, i) => makeSessionName(2024 + i));
+
+        let globalStudentsList = [];
+        let currentActiveStudent = null;
+        let activeStudentSession = null;
+        let studentDataListener = null;
+
+        function escapeHTML(val) {
+            return String(val ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
         }
-        return phone;
-    }
 
-    let studentPhone = checkStudentAuth();
-
-    function handleLogout() {
-        localStorage.removeItem("studentPhone");
-        localStorage.removeItem("selectedStudentId");
-        window.location.href = "index.html";
-    }
-
-    function handleInlineLogin(presetNumber) {
-        const inputVal = presetNumber || (document.getElementById('inline-student-phone')?.value || "").trim();
-        if (inputVal.length !== 10) {
-            showAlert("अमान्य नंबर", "कृपया 10-अंकों का सही रजिस्टर्ड मोबाइल नंबर दर्ज करें!", true);
-            return;
+        // ============================================================================
+        // 2. AUTH & NAVIGATION
+        // ============================================================================
+        function checkStudentAuth() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('verify') === '1') return "VERIFY_MODE";
+            return localStorage.getItem("studentPhone") || null;
         }
-        studentPhone = inputVal;
-        localStorage.setItem("studentPhone", inputVal);
-        document.getElementById('unauth-view').classList.add('hidden');
-        fetchStudentData();
-    }
 
-    function goBackToSelection() {
-        localStorage.removeItem("selectedStudentId");
-        document.getElementById('switch-account-btn').classList.add('hidden');
-        renderSelectionScreen(globalStudentsList);
-    }
+        let studentPhone = checkStudentAuth();
 
-    // Firebase Setup
-    const firebaseConfig = {
-        apiKey: "AIzaSyBDJnlr-VJt3OqvGeCRIzNCUjhLndpvyoQ",
-        authDomain: "gtc-fee-portal.firebaseapp.com",
-        databaseURL: "https://gtc-fee-portal-default-rtdb.firebaseio.com",
-        projectId: "gtc-fee-portal",
-        storageBucket: "gtc-fee-portal.firebasestorage.app",
-        messagingSenderId: "861357054407",
-        appId: "1:861357054407:web:8d1c8a5dce4c3969c361e2",
-        measurementId: "G-SJWZFVM3YQ"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        function handleLogout() {
+            localStorage.removeItem("studentPhone");
+            localStorage.removeItem("selectedStudentId");
+            window.location.href = "index.html";
+        }
 
-    let globalStudentsList = [];
-    let currentActiveStudent = null;
+        function handleInlineLogin() {
+            const inputVal = (document.getElementById('inline-student-phone')?.value || "").replace(/\D/g, '').trim();
+            if (inputVal.length !== 10) {
+                showAlert("Invalid Number", "Kripya 10-digit ka registered mobile number enter karein!", true);
+                return;
+            }
+            studentPhone = inputVal;
+            localStorage.setItem("studentPhone", inputVal);
+            document.getElementById('unauth-view').classList.remove('open');
+            fetchStudentData();
+        }
 
-    // SCANNED ID CARD & LIVE CLOUD VERIFICATION
-    function checkURLForScannedID() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('verify') === '1') {
+        function goBackToSelection() {
+            localStorage.removeItem("selectedStudentId");
+            document.getElementById('switch-account-btn').classList.add('hidden');
+            renderSelectionScreen(globalStudentsList);
+        }
+
+        // ============================================================================
+        // 3. UNIFIED FINANCIAL & 12-CYCLE ENGINE (100% Matched with Teacher Dashboard)
+        //    Fixes ₹2,000 vs ₹2,100 bug: Transactions are the single source of truth!
+        // ============================================================================
+        function parseAdmissionDateParts(dateStr) {
+            if (!dateStr || typeof dateStr !== "string") return { year: 2026, month: 0, day: 1 };
+            let year = 2026, month = 0, day = 1;
+            if (dateStr.includes('-')) {
+                const p = dateStr.split('-');
+                year = parseInt(p[0], 10) || 2026;
+                month = (parseInt(p[1], 10) || 1) - 1;
+                day = parseInt(p[2], 10) || 1;
+            } else if (dateStr.includes('/')) {
+                const p = dateStr.split('/');
+                day = parseInt(p[0], 10) || 1;
+                month = (parseInt(p[1], 10) || 1) - 1;
+                year = parseInt(p[2], 10) || 2026;
+                if (year < 100) year += 2000;
+            }
+            return { year, month, day };
+        }
+
+        function formatDate(date) {
+            return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function dateForAnchoredMonth(year, monthIndex, anchorDay) {
+            const totalMonths = year * 12 + monthIndex;
+            const targetYear = Math.floor(totalMonths / 12);
+            const targetMonth = ((totalMonths % 12) + 12) % 12;
+            const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+            return new Date(targetYear, targetMonth, Math.min(anchorDay, lastDay), 0, 0, 0, 0);
+        }
+
+        function getStudentAdmissionSession(student) {
+            return makeSessionName(parseAdmissionDateParts(student?.admissionDate).year);
+        }
+
+        function getStudentSessions(student) {
+            const admSession = getStudentAdmissionSession(student);
+            const startIdx = SESSIONS_LIST.indexOf(admSession);
+            if (startIdx >= 0) return SESSIONS_LIST.slice(startIdx);
+            return SESSIONS_LIST;
+        }
+
+        const cyclesCache = new Map();
+        function generateSession12Cycles(admissionDateStr, sessionStr) {
+            const todayKey = new Date().toISOString().slice(0, 10);
+            const cacheKey = `${admissionDateStr || '2026-01-01'}|${sessionStr}|${todayKey}`;
+            if (cyclesCache.has(cacheKey)) return cyclesCache.get(cacheKey);
+
+            const { year: admissionYear, month, day } = parseAdmissionDateParts(admissionDateStr);
+            const sessionStartYear = parseInt(String(sessionStr || '').split('-')[0], 10) || admissionYear;
+            const actualAdmissionDate = new Date(admissionYear, month, day, 0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const cycles = [];
+            for (let i = 0; i < 12; i++) {
+                const cycleStart = dateForAnchoredMonth(sessionStartYear, month + i, day);
+                const dueDate = dateForAnchoredMonth(sessionStartYear, month + i + 1, day);
+                const cycleEnd = new Date(dueDate.getTime() - 86400000);
+
+                let status = 'UPCOMING';
+                if (cycleStart < actualAdmissionDate) status = 'BEFORE_ADMISSION';
+                else if (dueDate <= today) status = 'PAID_OR_OVERDUE';
+                else if (cycleStart <= today && today < dueDate) status = 'RUNNING';
+
+                cycles.push({
+                    cycleNumber: i + 1,
+                    session: sessionStr,
+                    title: `${formatDate(cycleStart)} – ${formatDate(cycleEnd)}`,
+                    dueDate,
+                    dueDateLabel: formatDate(dueDate),
+                    status
+                });
+            }
+            cyclesCache.set(cacheKey, cycles);
+            return cycles;
+        }
+
+        /**
+         * Exact Financial Engine (Identical to Teacher Dashboard):
+         * - If `transactions.length > 0`, `creditedAmount` is ALWAYS the exact sum of `tx.amount`.
+         *   It NEVER uses `Math.max(transactionAmount, paidCycles * fee)`.
+         */
+        function computeStudentFinancials(s) {
+            const admDateStr = s.admissionDate || "2026-01-01";
+            const admSession = getStudentAdmissionSession(s);
+            const admSessionIdx = Math.max(0, SESSIONS_LIST.indexOf(admSession));
+            const monthlyFee = Math.max(1, parseInt(s.monthlyFee, 10) || 150);
+
+            const txs = Array.isArray(s.transactions) ? s.transactions.filter(Boolean) : [];
+            const hasTransactions = txs.length > 0;
+
+            const sessionCreditedMap = {};
+            const sessionPaidCyclesMap = {};
+            const sessionPartialMap = {};
+            SESSIONS_LIST.forEach(sess => {
+                sessionCreditedMap[sess] = 0;
+                sessionPaidCyclesMap[sess] = 0;
+                sessionPartialMap[sess] = 0;
+            });
+
+            if (hasTransactions) {
+                txs.forEach(tx => {
+                    const amt = parseInt(tx.amount, 10) || 0;
+                    const txSess = (tx.session && SESSIONS_LIST.includes(tx.session) && SESSIONS_LIST.indexOf(tx.session) >= admSessionIdx)
+                        ? tx.session
+                        : admSession;
+                    sessionCreditedMap[txSess] = (sessionCreditedMap[txSess] || 0) + amt;
+                });
+
+                let carryOver = 0;
+                for (let i = admSessionIdx; i < SESSIONS_LIST.length; i++) {
+                    const sess = SESSIONS_LIST[i];
+                    const availableAmt = (sessionCreditedMap[sess] || 0) + carryOver;
+                    const maxSessionFee = 12 * monthlyFee;
+                    const usedInSession = Math.min(maxSessionFee, availableAmt);
+                    carryOver = Math.max(0, availableAmt - maxSessionFee);
+
+                    sessionCreditedMap[sess] = usedInSession + (i === SESSIONS_LIST.length - 1 ? carryOver : 0);
+                    const fullCycles = Math.min(12, Math.floor(sessionCreditedMap[sess] / monthlyFee));
+                    sessionPaidCyclesMap[sess] = fullCycles;
+                    sessionPartialMap[sess] = fullCycles < 12 ? (sessionCreditedMap[sess] % monthlyFee) : 0;
+                }
+            } else {
+                let remLegacy = parseInt(s.paidCycles, 10) || 0;
+                const rawMap = (s.sessionPaid && typeof s.sessionPaid === 'object') ? s.sessionPaid : null;
+                const mapSum = rawMap ? Object.values(rawMap).reduce((a, b) => a + (parseInt(b, 10) || 0), 0) : 0;
+
+                for (let i = admSessionIdx; i < SESSIONS_LIST.length; i++) {
+                    const sess = SESSIONS_LIST[i];
+                    let cyc = 0;
+                    if (rawMap && mapSum > 0) {
+                        cyc = Math.max(0, Math.min(12, parseInt(rawMap[sess], 10) || 0));
+                    } else if (remLegacy > 0) {
+                        cyc = Math.min(12, remLegacy);
+                        remLegacy -= cyc;
+                    }
+                    sessionPaidCyclesMap[sess] = cyc;
+                    sessionCreditedMap[sess] = cyc * monthlyFee;
+                    sessionPartialMap[sess] = 0;
+                }
+            }
+
+            const now = new Date();
+            now.setHours(23, 59, 59, 999);
+            let currentRunningSession = admSession;
+            let totalElapsedCycles = 0;
+
+            for (let sIdx = admSessionIdx; sIdx < SESSIONS_LIST.length; sIdx++) {
+                const sessName = SESSIONS_LIST[sIdx];
+                const cycles12 = generateSession12Cycles(admDateStr, sessName);
+                let sessionStarted = false;
+                for (const c of cycles12) {
+                    if (c.status !== 'BEFORE_ADMISSION' && c.dueDate <= now) {
+                        totalElapsedCycles++;
+                        sessionStarted = true;
+                    }
+                    if (c.status === 'RUNNING') currentRunningSession = sessName;
+                }
+                if (sessionStarted && currentRunningSession === admSession) currentRunningSession = sessName;
+            }
+
+            const totalPaidSoFar = hasTransactions
+                ? txs.reduce((sum, tx) => sum + (parseInt(tx.amount, 10) || 0), 0)
+                : Object.values(sessionCreditedMap).reduce((a, b) => a + b, 0);
+
+            const expectedTotalFee = totalElapsedCycles * monthlyFee;
+            const netBalance = expectedTotalFee - totalPaidSoFar;
+
+            return {
+                ...s,
+                monthlyFee,
+                sessionPaid: sessionPaidCyclesMap,
+                _sessionCredited: sessionCreditedMap,
+                _sessionPartial: sessionPartialMap,
+                _admSession: admSession,
+                _activeSession: currentRunningSession,
+                _totalElapsedCycles: totalElapsedCycles,
+                _netBalance: netBalance,
+                _totalPaid: totalPaidSoFar,
+                _rollId: "GTC-" + (s.id ? String(s.id).slice(-5) : "00000")
+            };
+        }
+
+        function getStudentSessionLedger(student, sessionStr) {
+            const fee = parseInt(student?.monthlyFee, 10) || 150;
+            const cycles = generateSession12Cycles(student?.admissionDate || '2026-01-01', sessionStr);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+
+            const eligibleCycles = cycles.filter(c => c.status !== 'BEFORE_ADMISSION');
+            const expectedCycles = eligibleCycles.filter(c => c.dueDate <= today).length;
+            const paidCycles = Math.max(0, Math.min(12, parseInt(student.sessionPaid?.[sessionStr], 10) || 0));
+            const partialCredit = parseInt(student._sessionPartial?.[sessionStr], 10) || 0;
+            const creditedAmount = parseInt(student._sessionCredited?.[sessionStr], 10) || 0;
+            const expectedAmount = expectedCycles * fee;
+            const balance = expectedAmount - creditedAmount;
+            const nextCycle = eligibleCycles.find(c => c.dueDate > today);
+
+            const admissionSession = getStudentAdmissionSession(student);
+            const allTransactions = Array.isArray(student?.transactions) ? student.transactions.filter(Boolean) : [];
+            const sessionTransactions = allTransactions.filter(tx => (tx.session || admissionSession) === sessionStr);
+
+            return {
+                fee,
+                cycles,
+                expectedCycles,
+                paidCycles,
+                partialCredit,
+                expectedAmount,
+                creditedAmount,
+                balance,
+                transactions: sessionTransactions,
+                allTransactions,
+                nextDueDate: nextCycle ? nextCycle.dueDate : null
+            };
+        }
+
+        // ============================================================================
+        // 4. REALTIME CLOUD FETCH & RENDERING
+        // ============================================================================
+        function fetchStudentData() {
+            if (!studentPhone || studentPhone === "VERIFY_MODE") return;
+
+            const studentsRef = db.ref('gtc_students');
+            if (studentDataListener) studentsRef.off('value', studentDataListener);
+
+            studentDataListener = (snapshot) => {
+                const data = snapshot.val();
+                const rawList = [];
+
+                if (Array.isArray(data)) {
+                    data.forEach((item, index) => {
+                        if (item && typeof item === 'object' && item.isDeleted !== true && !item.deletedAt) {
+                            rawList.push({ ...item, id: String(item.id ?? index), _fbKey: String(index) });
+                        }
+                    });
+                } else if (data && typeof data === 'object') {
+                    Object.entries(data).forEach(([key, item]) => {
+                        if (item && typeof item === 'object' && item.isDeleted !== true && !item.deletedAt) {
+                            rawList.push({ ...item, id: String(item.id ?? key), _fbKey: String(key) });
+                        }
+                    });
+                }
+
+                globalStudentsList = rawList
+                    .filter(s => String(s.phone || '').trim() === String(studentPhone).trim())
+                    .map(computeStudentFinancials);
+
+                if (globalStudentsList.length === 0) {
+                    document.getElementById('dashboard-view').classList.add('hidden');
+                    document.getElementById('selection-view').classList.add('hidden');
+                    document.getElementById('unauth-view').classList.add('open');
+                    showAlert("Student Not Found", "Is mobile number se koi active student record nahi mila.", true);
+                    return;
+                }
+
+                document.getElementById('unauth-view').classList.remove('open');
+
+                if (globalStudentsList.length > 1) {
+                    const selectedId = localStorage.getItem("selectedStudentId");
+                    const matched = globalStudentsList.find(s => String(s.id) === String(selectedId));
+                    if (matched) renderStudentDashboard(matched);
+                    else renderSelectionScreen(globalStudentsList);
+                } else {
+                    renderStudentDashboard(globalStudentsList[0]);
+                }
+            };
+
+            studentsRef.on('value', studentDataListener, (err) => {
+                showAlert("Connection Error", err.message || "Unable to read student data", true);
+            });
+        }
+
+        function renderSelectionScreen(list) {
+            document.getElementById('selection-view').classList.remove('hidden');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('switch-account-btn').classList.add('hidden');
+
+            document.getElementById('student-list-grid').innerHTML = list.map(s => `
+                <div style="background:var(--bg-subtle);border:1px solid var(--border-color);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="avatar-hdr" style="width:48px;height:48px;border-radius:12px;">
+                            ${s.avatar ? `<img src="${s.avatar}" alt="">` : escapeHTML((s.name || 'S').charAt(0).toUpperCase())}
+                        </div>
+                        <div>
+                            <strong style="font-size:15px;display:block;">${escapeHTML(s.name)}</strong>
+                            <span style="font-size:12px;color:var(--text-muted);">${escapeHTML(s.studentClass || 'Class 10th')} • S/O ${escapeHTML(s.fatherName)}</span>
+                            <span style="font-size:11px;color:var(--emerald);font-weight:700;display:block;margin-top:2px;">Paid: ₹${s._totalPaid.toLocaleString('en-IN')}</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="selectAndOpenStudent('${s.id}')" class="btn-primary">
+                        <span>Open</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function selectAndOpenStudent(id) {
+            localStorage.setItem("selectedStudentId", id);
+            const st = globalStudentsList.find(s => String(s.id) === String(id));
+            if (st) renderStudentDashboard(st);
+        }
+
+        function renderStudentDashboard(student) {
+            currentActiveStudent = student;
+            document.getElementById('selection-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+
+            const switchBtn = document.getElementById('switch-account-btn');
+            if (globalStudentsList.length > 1) switchBtn.classList.remove('hidden');
+            else switchBtn.classList.add('hidden');
+
+            const name = student.name || 'Student';
+            document.getElementById('header-student-name').textContent = name;
+            const hdrAvatar = document.getElementById('student-initial');
+            hdrAvatar.innerHTML = student.avatar
+                ? `<img src="${student.avatar}" alt="">`
+                : escapeHTML(name.charAt(0).toUpperCase());
+
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-class').textContent = student.studentClass || 'Class 10th';
+            document.getElementById('profile-roll').textContent = student._rollId;
+            document.getElementById('profile-father').textContent = student.fatherName || '-';
+            document.getElementById('profile-phone').textContent = student.phone || '-';
+            document.getElementById('profile-fee').textContent = student.monthlyFee || 150;
+            document.getElementById('profile-admission').textContent = `${student.admissionDate || '-'} (${student._admSession})`;
+
+            const avatarImg = document.getElementById('student-avatar-img');
+            const avatarText = document.getElementById('student-avatar-text');
+            if (student.avatar) {
+                avatarImg.src = student.avatar;
+                avatarImg.classList.remove('hidden');
+                avatarText.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                avatarText.classList.remove('hidden');
+                avatarText.textContent = name.charAt(0).toUpperCase();
+            }
+
+            const sessions = getStudentSessions(student);
+            const select = document.getElementById('student-session-select');
+            select.innerHTML = sessions.map(sess =>
+                `<option value="${sess}">Session ${sess}${sess === student._activeSession ? ' (Active)' : ''}</option>`
+            ).join('');
+
+            if (!activeStudentSession || !sessions.includes(activeStudentSession)) {
+                activeStudentSession = sessions.includes(student._activeSession) ? student._activeSession : sessions[0];
+            }
+            select.value = activeStudentSession;
+            renderSelectedStudentSession(student, activeStudentSession);
+        }
+
+        function handleStudentSessionChange(sessionStr) {
+            if (!currentActiveStudent) return;
+            activeStudentSession = sessionStr;
+            renderSelectedStudentSession(currentActiveStudent, sessionStr);
+        }
+
+        function renderSelectedStudentSession(student, sessionStr) {
+            const ledger = getStudentSessionLedger(student, sessionStr);
+            const paidCount = ledger.paidCycles;
+
+            document.getElementById('header-session-label').textContent = `• Session ${sessionStr}`;
+            document.getElementById('session-tracker-badge').textContent = `SESSION ${sessionStr}`;
+
+            const cycBadgeText = ledger.partialCredit > 0
+                ? `${paidCount} / 12 Full Cycles Paid (+₹${ledger.partialCredit} partial)`
+                : `${paidCount} / 12 Cycles Paid`;
+            document.getElementById('profile-cycles-badge').textContent = cycBadgeText;
+
+            const progressPercent = Math.min(100, Math.round((ledger.creditedAmount / (12 * ledger.fee)) * 100));
+            document.getElementById('cycle-percentage-text').textContent = `${progressPercent}%`;
+            document.getElementById('cycle-progress-bar').style.width = `${progressPercent}%`;
+
+            // 4 Financial Stat Boxes
+            document.getElementById('student-expected-display').textContent = `₹${ledger.expectedAmount.toLocaleString('en-IN')}`;
+            document.getElementById('student-expected-sub').textContent = `${ledger.expectedCycles} completed month(s) in ${sessionStr}`;
+
+            document.getElementById('student-credited-display').textContent = `₹${ledger.creditedAmount.toLocaleString('en-IN')}`;
+            document.getElementById('student-credited-sub').textContent = `Total All-Time Paid: ₹${student._totalPaid.toLocaleString('en-IN')}`;
+
+            document.getElementById('student-dues-label').textContent = `Pending Dues (${sessionStr})`;
+            document.getElementById('student-advance-label').textContent = `Advance Credit (${sessionStr})`;
+
+            const duesEl = document.getElementById('student-dues-display');
+            const advanceEl = document.getElementById('student-advance-display');
+            const duesSubtext = document.getElementById('dues-subtext');
+
+            if (ledger.balance > 0) {
+                duesEl.textContent = `₹${ledger.balance.toLocaleString('en-IN')}`;
+                advanceEl.textContent = '₹0';
+                duesSubtext.textContent = `Remaining due for completed months`;
+            } else if (ledger.balance < 0) {
+                duesEl.textContent = '₹0';
+                advanceEl.textContent = `+₹${Math.abs(ledger.balance).toLocaleString('en-IN')}`;
+                duesSubtext.textContent = `Advance credit towards upcoming cycles`;
+            } else {
+                duesEl.textContent = '₹0';
+                advanceEl.textContent = '₹0';
+                duesSubtext.textContent = ledger.nextDueDate
+                    ? `All clear! Next fee due on ${formatDate(ledger.nextDueDate)}`
+                    : `All clear for ${sessionStr}`;
+            }
+
+            renderChecklist(student, sessionStr, ledger);
+            renderTransactions(ledger.allTransactions);
+        }
+
+        function renderChecklist(student, sessionStr, ledger) {
+            const grid = document.getElementById('billing-checklist-grid');
+            const cycles = ledger.cycles;
+            const paidCount = ledger.paidCycles;
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+
+            grid.innerHTML = cycles.map((cycle, index) => {
+                const isBefore = cycle.status === 'BEFORE_ADMISSION';
+                const isPaid = !isBefore && index < paidCount;
+                const isPartial = !isBefore && index === paidCount && ledger.partialCredit > 0;
+                const isDue = !isBefore && cycle.dueDate <= today;
+
+                let cls = "cycle-card";
+                let badge = `<span class="badge" style="background:var(--bg-muted);color:var(--text-muted);">Due ${cycle.dueDateLabel}</span>`;
+                let icon = `<i class="fa-regular fa-clock" style="color:var(--text-muted);"></i>`;
+
+                if (isBefore) {
+                    cls += " before";
+                    badge = `<span class="badge" style="background:var(--bg-muted);color:var(--text-muted);">BEFORE ADM</span>`;
+                } else if (isPaid) {
+                    cls += " paid";
+                    badge = `<span class="badge badge-adv">✓ PAID (₹${ledger.fee})</span>`;
+                    icon = `<i class="fa-solid fa-circle-check" style="color:var(--emerald);"></i>`;
+                } else if (isPartial) {
+                    cls += " partial";
+                    const rem = ledger.fee - ledger.partialCredit;
+                    badge = `<span class="badge badge-amber">₹${ledger.partialCredit} PAID • ₹${rem} LEFT</span>`;
+                    icon = `<i class="fa-solid fa-coins" style="color:var(--amber);"></i>`;
+                } else if (isDue) {
+                    cls += " due";
+                    badge = `<span class="badge badge-due">⚠ DUE (₹${ledger.fee})</span>`;
+                    icon = `<i class="fa-solid fa-circle-exclamation" style="color:var(--rose);"></i>`;
+                } else if (cycle.status === 'RUNNING') {
+                    cls += " running";
+                    badge = `<span class="badge badge-clear">⚡ RUNNING • Due ${cycle.dueDateLabel}</span>`;
+                    icon = `<i class="fa-solid fa-bolt" style="color:var(--cyan);"></i>`;
+                }
+
+                return `
+                    <div class="${cls}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <strong style="font-size:12px;text-transform:uppercase;color:var(--text-secondary);">Cycle ${index + 1}</strong>
+                            ${icon}
+                        </div>
+                        <div style="font-size:13.5px;font-weight:800;color:var(--text-primary);">${cycle.title}</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border-color);">
+                            <span style="font-size:10.5px;font-weight:700;color:var(--text-muted);">STATUS</span>
+                            ${badge}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderTransactions(txs) {
+            const tbody = document.getElementById('transaction-history-body');
+            const mobileTxList = document.getElementById('mobile-tx-list');
+            const list = Array.isArray(txs) ? txs.filter(Boolean) : [];
+
+            document.getElementById('tx-total-count').textContent = `${list.length} Receipts`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted);">No payment receipts recorded yet.</td></tr>`;
+                mobileTxList.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No payment receipts recorded yet.</div>`;
+                return;
+            }
+
+            const reversed = list.slice().reverse();
+            tbody.innerHTML = reversed.map(t => `
+                <tr>
+                    <td><strong class="font-mono-code" style="color:var(--primary);">${escapeHTML(t.receiptId)}</strong></td>
+                    <td><span class="badge badge-class">${escapeHTML(t.session || currentActiveStudent?._admSession || '-')}</span></td>
+                    <td style="font-size:12px;color:var(--text-secondary);">${escapeHTML(t.date)}</td>
+                    <td style="font-size:12px;font-weight:600;">${escapeHTML(t.cyclesCovered || '-')}</td>
+                    <td><strong style="font-size:14.5px;color:var(--emerald);">₹${(parseInt(t.amount, 10) || 0).toLocaleString('en-IN')}</strong></td>
+                    <td><span class="badge" style="background:var(--bg-muted);color:var(--text-secondary);">${escapeHTML(t.mode || 'Cash')}</span></td>
+                    <td style="text-align:right;" class="no-print">
+                        <button type="button" onclick="openReceiptSlip('${escapeHTML(t.receiptId)}')" class="btn-outline" style="padding:5px 10px;font-size:11.5px;">
+                            <i class="fa-solid fa-receipt" style="color:var(--primary);"></i>
+                            <span>Slip</span>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            mobileTxList.innerHTML = reversed.map(t => `
+                <div style="background:var(--bg-subtle);border:1px solid var(--border-color);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <strong class="font-mono-code" style="color:var(--primary);font-size:12.5px;">${escapeHTML(t.receiptId)}</strong>
+                            <span class="badge badge-class" style="font-size:9.5px;padding:1px 5px;margin-left:5px;">${escapeHTML(t.session || '-')}</span>
+                        </div>
+                        <strong style="font-size:15px;color:var(--emerald);">₹${(parseInt(t.amount, 10) || 0).toLocaleString('en-IN')}</strong>
+                    </div>
+                    <div style="font-size:12px;font-weight:600;color:var(--text-primary);">${escapeHTML(t.cyclesCovered || '-')}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border-color);font-size:11px;color:var(--text-muted);">
+                        <span>${escapeHTML(t.date)} (${escapeHTML(t.mode || 'Cash')})</span>
+                        <button type="button" onclick="openReceiptSlip('${escapeHTML(t.receiptId)}')" style="border:none;background:transparent;color:var(--primary);font-weight:800;cursor:pointer;">
+                            View Slip →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================================================
+        // 5. QR SCAN VERIFICATION & DIGITAL ID PREVIEW
+        // ============================================================================
+        function checkURLForScannedID() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('verify') !== '1') return false;
+
             const name = params.get('name') || "Student";
             const roll = params.get('roll') || "GTC-00000";
             const sClass = params.get('cls') || "Class 10th";
@@ -821,914 +1745,229 @@
             const adm = params.get('adm') || "-";
             const studentId = params.get('id');
             const scanSession = params.get('session') || '—';
-            const scanSessionEl = document.getElementById('scan-card-session');
-            if (scanSessionEl) scanSessionEl.textContent = `SESSION ${scanSession}`;
 
-            // Render URL parameters
-            document.getElementById('scan-card-name').innerText = name;
-            document.getElementById('scan-card-roll').innerText = roll;
-            document.getElementById('scan-card-class').innerText = sClass;
-            document.getElementById('scan-card-father').innerText = father;
-            document.getElementById('scan-card-phone').innerText = phone || "-";
-            document.getElementById('scan-card-adm').innerText = adm;
+            document.getElementById('scan-card-session').textContent = `SESSION ${scanSession}`;
+            document.getElementById('scan-card-name').textContent = name;
+            document.getElementById('scan-card-roll').textContent = roll;
+            document.getElementById('scan-card-class').textContent = sClass;
+            document.getElementById('scan-card-father').textContent = father;
+            document.getElementById('scan-card-phone').textContent = phone || "-";
+            document.getElementById('scan-card-adm').textContent = adm;
 
             const avatarBox = document.getElementById('scan-card-avatar');
-            avatarBox.innerHTML = `<span class="font-black text-3xl text-slate-700">${name.charAt(0).toUpperCase()}</span>`;
+            avatarBox.innerHTML = escapeHTML(name.charAt(0).toUpperCase());
 
             const topPill = document.getElementById('scan-top-status-pill');
             const topIcon = document.getElementById('scan-top-status-icon');
             const topText = document.getElementById('scan-top-status-text');
-            const sealBanner = document.getElementById('scan-seal-banner');
-            const sealIcon = document.getElementById('scan-seal-icon');
-            const sealTitle = document.getElementById('scan-seal-title');
-            const sealDesc = document.getElementById('scan-seal-desc');
-            const sealBadge = document.getElementById('scan-seal-badge');
             const watermark = document.getElementById('scan-cancelled-watermark');
 
-            topPill.className = "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-black tracking-wider uppercase";
-            topIcon.className = "fa-solid fa-spinner animate-spin";
-            topText.innerText = "VERIFYING WITH CLOUD...";
+            topPill.className = "badge badge-clear";
+            topIcon.className = "fa-solid fa-spinner fa-spin";
+            topText.textContent = "VERIFYING WITH CLOUD...";
             watermark.classList.add('hidden');
 
-            // Realtime Cloud Match
             db.ref('gtc_students').once('value').then((snap) => {
-                const list = snap.val() || [];
+                const raw = snap.val() || [];
+                const list = (Array.isArray(raw) ? raw : Object.values(raw)).filter(Boolean);
                 let found = null;
-                if (studentId) {
-                    found = list.find(s => String(s.id).trim() === String(studentId).trim());
-                } else if (phone) {
-                    found = list.find(s => String(s.phone).trim() === String(phone).trim());
-                }
+                if (studentId) found = list.find(s => String(s.id).trim() === String(studentId).trim());
+                else if (phone) found = list.find(s => String(s.phone).trim() === String(phone).trim());
 
-                if (found) {
-                    if (found.name) document.getElementById('scan-card-name').innerText = found.name;
-                    if (found.fatherName) document.getElementById('scan-card-father').innerText = found.fatherName;
-                    if (found.studentClass) document.getElementById('scan-card-class').innerText = found.studentClass;
-                    if (found.phone) document.getElementById('scan-card-phone').innerText = found.phone;
-                    if (found.admissionDate) document.getElementById('scan-card-adm').innerText = found.admissionDate;
-                    if (found.id) document.getElementById('scan-card-roll').innerText = "GTC-" + String(found.id).slice(-5);
-                    
+                const isActiveRecord = found && found.isDeleted !== true && !found.deletedAt;
+
+                if (isActiveRecord) {
+                    document.getElementById('scan-card-name').textContent = found.name || name;
+                    document.getElementById('scan-card-father').textContent = found.fatherName || father;
+                    document.getElementById('scan-card-class').textContent = found.studentClass || sClass;
+                    document.getElementById('scan-card-phone').textContent = found.phone || phone;
+                    document.getElementById('scan-card-adm').textContent = found.admissionDate || adm;
+                    document.getElementById('scan-card-roll').textContent = "GTC-" + String(found.id).slice(-5);
+
                     if (found.avatar) {
-                        avatarBox.innerHTML = `<img src="${found.avatar}" class="w-full h-full object-cover" alt="${found.name}">`;
-                    } else {
-                        avatarBox.innerHTML = `<span class="font-black text-3xl text-slate-700">${found.name.charAt(0).toUpperCase()}</span>`;
+                        avatarBox.innerHTML = `<img src="${found.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
                     }
-
-                    topPill.className = "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black tracking-wider uppercase";
+                    topPill.className = "badge badge-adv";
                     topIcon.className = "fa-solid fa-circle-check";
-                    topText.innerText = "VERIFIED OFFICIAL ID PASS";
-
-                    sealBanner.className = "bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between text-[10px]";
-                    sealIcon.className = "fa-solid fa-shield-halved text-emerald-600 text-base";
-                    sealTitle.className = "font-black text-emerald-950 uppercase block";
-                    sealTitle.innerText = "AUTHENTIC RECORD";
-                    sealDesc.className = "text-emerald-700 text-[9px]";
-                    sealDesc.innerText = "Verified on Central Cloud Database";
-                    sealBadge.className = "font-black text-emerald-800 text-xs tracking-wider";
-                    sealBadge.innerText = "ACTIVE ✓";
-
+                    topText.textContent = "VERIFIED OFFICIAL ID PASS";
                     watermark.classList.add('hidden');
                 } else {
-                    topPill.className = "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-black tracking-wider uppercase";
+                    topPill.className = "badge badge-due";
                     topIcon.className = "fa-solid fa-triangle-exclamation";
-                    topText.innerText = "ADMISSION CANCELLED / RECORD DELETED";
-
-                    sealBanner.className = "bg-rose-50 border border-rose-200 rounded-xl p-2.5 flex items-center justify-between text-[10px]";
-                    sealIcon.className = "fa-solid fa-circle-xmark text-rose-600 text-base";
-                    sealTitle.className = "font-black text-rose-950 uppercase block";
-                    sealTitle.innerText = "RECORD NOT FOUND";
-                    sealDesc.className = "text-rose-700 text-[9px]";
-                    sealDesc.innerText = "Student record is no longer active";
-                    sealBadge.className = "font-black text-rose-700 text-xs tracking-wider";
-                    sealBadge.innerText = "CANCELLED ✕";
-
+                    topText.textContent = "ADMISSION CANCELLED / DELETED";
                     watermark.classList.remove('hidden');
                 }
-            }).catch(() => {
-                topText.innerText = "NETWORK VERIFICATION FAILED";
             });
 
             document.getElementById('dashboard-view')?.classList.add('hidden');
-            document.getElementById('unauth-view')?.classList.add('hidden');
-            document.getElementById('selection-view')?.classList.add('hidden');
-
-            const modal = document.getElementById('scanned-id-card-modal');
-            const box = document.getElementById('scanned-id-card-box');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                box.classList.remove('scale-95');
-                box.classList.add('scale-100');
-            }, 50);
-
+            document.getElementById('scanned-id-card-modal').classList.add('open');
             return true;
         }
-        return false;
-    }
 
-    function openScannedIDPreview() {
-        if (!currentActiveStudent) return;
-        const s = currentActiveStudent;
+        function openScannedIDPreview() {
+            if (!currentActiveStudent) return;
+            const s = currentActiveStudent;
+            document.getElementById('scan-card-name').textContent = s.name;
+            document.getElementById('scan-card-roll').textContent = s._rollId;
+            document.getElementById('scan-card-class').textContent = s.studentClass || "Class 10th";
+            document.getElementById('scan-card-father').textContent = s.fatherName;
+            document.getElementById('scan-card-phone').textContent = s.phone;
+            document.getElementById('scan-card-adm').textContent = s.admissionDate || "-";
+            document.getElementById('scan-card-session').textContent = `SESSION ${activeStudentSession || s._activeSession}`;
 
-        document.getElementById('scan-card-name').innerText = s.name;
-        document.getElementById('scan-card-roll').innerText = "GTC-" + (s.id ? String(s.id).slice(-5) : "00000");
-        document.getElementById('scan-card-class').innerText = s.studentClass || "Class 10th";
-        document.getElementById('scan-card-father').innerText = s.fatherName;
-        document.getElementById('scan-card-phone').innerText = s.phone;
-        document.getElementById('scan-card-adm').innerText = s.admissionDate || "-";
-        const scanSessionEl = document.getElementById('scan-card-session');
-        if (scanSessionEl) scanSessionEl.textContent = `SESSION ${activeStudentSession || getCurrentActiveStudentSession(s)}`;
+            const avatarBox = document.getElementById('scan-card-avatar');
+            avatarBox.innerHTML = s.avatar
+                ? `<img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="">`
+                : escapeHTML((s.name || 'S').charAt(0).toUpperCase());
 
-        const avatarBox = document.getElementById('scan-card-avatar');
-        if (s.avatar) {
-            avatarBox.innerHTML = `<img src="${s.avatar}" class="w-full h-full object-cover" alt="${s.name}">`;
-        } else {
-            avatarBox.innerHTML = `<span class="font-black text-3xl text-slate-700">${s.name.charAt(0).toUpperCase()}</span>`;
+            document.getElementById('scan-cancelled-watermark').classList.add('hidden');
+            document.getElementById('scanned-id-card-modal').classList.add('open');
         }
 
-        const topPill = document.getElementById('scan-top-status-pill');
-        const topIcon = document.getElementById('scan-top-status-icon');
-        const topText = document.getElementById('scan-top-status-text');
-        topPill.className = "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black tracking-wider uppercase";
-        topIcon.className = "fa-solid fa-circle-check";
-        topText.innerText = "OFFICIAL VERIFIED ID PASS";
-
-        const watermark = document.getElementById('scan-cancelled-watermark');
-        watermark.classList.add('hidden');
-
-        const modal = document.getElementById('scanned-id-card-modal');
-        const box = document.getElementById('scanned-id-card-box');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 50);
-    }
-
-    function closeScannedCardModal() {
-        const modal = document.getElementById('scanned-id-card-modal');
-        const box = document.getElementById('scanned-id-card-box');
-        modal.classList.add('opacity-0');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
+        function closeScannedCardModal() {
+            document.getElementById('scanned-id-card-modal').classList.remove('open');
             if (studentPhone && studentPhone !== "VERIFY_MODE") {
                 document.getElementById('dashboard-view')?.classList.remove('hidden');
             } else {
-                document.getElementById('unauth-view')?.classList.remove('hidden');
-            }
-        }, 300);
-    }
-
-    // SESSION-WISE FEE ENGINE — aligned with the Teacher Dashboard.
-    // A monthly cycle becomes due on its next admission-day anniversary.
-    // Example: admission 1 Oct => first fee due 1 Nov, never before that date.
-    let activeStudentSession = null;
-    let lastDetectedAutoSession = null;
-    let studentDataListener = null;
-
-    function parseAdmissionDateParts(dateStr) {
-        const value = String(dateStr || "2026-01-01").trim();
-        let year = 2026, month = 0, day = 1;
-        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
-            const parts = value.split('-');
-            year = parseInt(parts[0], 10) || 2026;
-            month = (parseInt(parts[1], 10) || 1) - 1;
-            day = parseInt(parts[2], 10) || 1;
-        } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(value)) {
-            const parts = value.split('/');
-            day = parseInt(parts[0], 10) || 1;
-            month = (parseInt(parts[1], 10) || 1) - 1;
-            year = parseInt(parts[2], 10) || 2026;
-            if (year < 100) year += 2000;
-        } else {
-            const parsed = new Date(value);
-            if (!Number.isNaN(parsed.getTime())) {
-                year = parsed.getFullYear(); month = parsed.getMonth(); day = parsed.getDate();
+                document.getElementById('unauth-view')?.classList.add('open');
             }
         }
-        return { year, month, day };
-    }
 
-    // Keep the same supported session range as the Teacher Dashboard (2024-25 to 2030-31).
-    function makeStudentSessionName(startYear) {
-        const parsed = parseInt(startYear, 10);
-        const y = Math.max(2024, Math.min(2030, Number.isFinite(parsed) ? parsed : new Date().getFullYear()));
-        return `${y}-${String((y + 1) % 100).padStart(2, '0')}`;
-    }
+        // ============================================================================
+        // 6. RECEIPT SLIP, UPI QR & PHOTO UPLOAD (Safe Single-Field Cloud Update)
+        // ============================================================================
+        function openReceiptSlip(receiptId) {
+            if (!currentActiveStudent) return;
+            const tx = (currentActiveStudent.transactions || []).find(t => t && t.receiptId === receiptId);
+            if (!tx) return;
 
-    function getStudentAdmissionSession(student) {
-        return makeStudentSessionName(parseAdmissionDateParts(student?.admissionDate).year);
-    }
+            document.getElementById('rcpt-id').textContent = tx.receiptId;
+            document.getElementById('rcpt-name').textContent = currentActiveStudent.name;
+            document.getElementById('rcpt-class').textContent = currentActiveStudent.studentClass || 'Class 10th';
+            document.getElementById('rcpt-father').textContent = currentActiveStudent.fatherName;
+            document.getElementById('rcpt-date').textContent = tx.date || '-';
+            document.getElementById('rcpt-session-label').textContent = `Session ${tx.session || currentActiveStudent._admSession}`;
+            document.getElementById('rcpt-cycles').textContent = tx.cyclesCovered || 'Monthly Fee';
+            document.getElementById('rcpt-mode').textContent = tx.mode || 'Cash / UPI';
+            document.getElementById('rcpt-amount').textContent = `₹${(parseInt(tx.amount, 10) || 0).toLocaleString('en-IN')}`;
 
-    function getStudentSessions(student) {
-        const admissionYear = parseAdmissionDateParts(student?.admissionDate).year;
-        const firstYear = Math.max(2024, Math.min(2030, admissionYear));
-        const sessions = [];
-        for (let year = firstYear; year <= 2030; year++) sessions.push(makeStudentSessionName(year));
-        // Keep any valid, already-recorded session inside the Teacher Dashboard's supported range.
-        const recordedSessions = [
-            ...Object.keys(student?.sessionPaid && typeof student.sessionPaid === 'object' ? student.sessionPaid : {}),
-            ...(Array.isArray(student?.transactions) ? student.transactions : []).map(tx => tx?.session).filter(Boolean)
-        ];
-        recordedSessions.forEach(sess => {
-            const m = String(sess).match(/^(\d{4})-(\d{2})$/);
-            if (!m) return;
-            const year = parseInt(m[1], 10);
-            if (year >= firstYear && year <= 2030) {
-                const normalized = makeStudentSessionName(year);
-                if (!sessions.includes(normalized)) sessions.push(normalized);
-            }
-        });
-        return sessions.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
-    }
+            document.getElementById('receipt-modal').classList.add('open');
+        }
 
-    function dateForAnchoredMonth(year, monthIndex, anchorDay) {
-        const first = new Date(year, monthIndex, 1, 0, 0, 0, 0);
-        const lastDay = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
-        return new Date(first.getFullYear(), first.getMonth(), Math.min(anchorDay, lastDay), 0, 0, 0, 0);
-    }
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.remove('open');
+        }
 
-    function generateSession12Cycles(admissionDateStr, sessionStr) {
-        const { year: admissionYear, month, day } = parseAdmissionDateParts(admissionDateStr);
-        const sessionStartYear = parseInt(String(sessionStr || '').split('-')[0], 10) || admissionYear;
-        const actualAdmissionDate = new Date(admissionYear, month, day, 0, 0, 0, 0);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const cycles = [];
+        function printReceiptSlip() {
+            document.body.classList.add('printing-single-slip');
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => document.body.classList.remove('printing-single-slip'), 500);
+            }, 50);
+        }
 
-        for (let i = 0; i < 12; i++) {
-            const cycleStart = dateForAnchoredMonth(sessionStartYear, month + i, day);
-            const dueDate = dateForAnchoredMonth(sessionStartYear, month + i + 1, day);
-            const cycleEnd = new Date(dueDate.getTime() - 1);
-            let status = 'UPCOMING';
-            if (cycleStart < actualAdmissionDate) status = 'BEFORE_ADMISSION';
-            else if (dueDate <= today) status = 'PAID_OR_OVERDUE';
-            else if (cycleStart <= today && today < dueDate) status = 'RUNNING';
+        function printFullStatement() {
+            document.body.classList.remove('printing-single-slip');
+            window.print();
+        }
 
-            cycles.push({
-                cycleNumber: i + 1,
-                session: sessionStr,
-                title: `${formatDate(cycleStart)} – ${formatDate(cycleEnd)}`,
-                dueDate,
-                dueDateLabel: formatDate(dueDate),
-                status,
-                startDate: cycleStart,
-                endDate: cycleEnd
+        function openPaymentQR() {
+            if (!currentActiveStudent || !activeStudentSession) return;
+            const ledger = getStudentSessionLedger(currentActiveStudent, activeStudentSession);
+            const amountVal = ledger.balance > 0 ? ledger.balance : ledger.fee;
+
+            document.getElementById('qr-amount').textContent = amountVal;
+            const upiString = `upi://pay?pa=8217598939-3@ybl&pn=Gautam%20Teaching%20Center&am=${amountVal}&cu=INR&tn=Fee%20${encodeURIComponent(currentActiveStudent.name)}`;
+
+            document.getElementById('gtc-gpay-link').setAttribute('href', upiString);
+            document.getElementById('qr-image-tag').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiString)}`;
+
+            const waMsg = `Namaste Gautam Sir, maine ${currentActiveStudent.name} (${currentActiveStudent.studentClass || 'Class 10th'}) ki coaching fee ₹${amountVal} Online UPI se pay kar di hai. Kripya verify karein.`;
+            document.getElementById('wa-screenshot-link').href = `https://wa.me/918217598939?text=${encodeURIComponent(waMsg)}`;
+
+            document.getElementById('qr-payment-modal').classList.add('open');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-payment-modal').classList.remove('open');
+        }
+
+        function copyUPIId() {
+            navigator.clipboard.writeText("8217598939-3@ybl").then(() => {
+                const el = document.getElementById('copy-btn-text');
+                el.textContent = "Copied ✓";
+                setTimeout(() => { el.textContent = "Copy"; }, 1800);
             });
         }
-        return cycles;
-    }
 
-    function formatDate(date) {
-        const d = date.getDate();
-        const m = date.toLocaleString('en-IN', { month: 'short' });
-        const y = date.getFullYear();
-        return `${d} ${m} ${y}`;
-    }
-
-    function getStudentSessionPaidMap(student, sessions = getStudentSessions(student)) {
-        const admissionSession = getStudentAdmissionSession(student);
-        const map = {};
-        sessions.forEach(sess => { map[sess] = 0; });
-
-        const savedMap = student?.sessionPaid && typeof student.sessionPaid === 'object' ? student.sessionPaid : null;
-        if (savedMap) {
-            sessions.forEach(sess => {
-                const value = parseInt(savedMap[sess], 10);
-                map[sess] = Number.isFinite(value) && value > 0 ? Math.min(12, value) : 0;
-            });
-            const mappedTotal = Object.values(map).reduce((sum, n) => sum + n, 0);
-            const legacyTotal = Math.max(0, parseInt(student?.paidCycles, 10) || 0);
-            if (mappedTotal === 0 && legacyTotal > 0) {
-                let remaining = legacyTotal;
-                for (const sess of sessions) {
-                    if (remaining <= 0) break;
-                    const take = Math.min(12, remaining);
-                    map[sess] = take;
-                    remaining -= take;
-                }
-            }
-        } else {
-            let remaining = Math.max(0, parseInt(student?.paidCycles, 10) || 0);
-            for (const sess of sessions) {
-                if (remaining <= 0) break;
-                const take = Math.min(12, remaining);
-                map[sess] = take;
-                remaining -= take;
-            }
-        }
-        // Never credit any fee session before the admission session.
-        const admYear = parseAdmissionDateParts(student?.admissionDate).year;
-        sessions.forEach(sess => {
-            const sessYear = parseInt(sess.split('-')[0], 10);
-            if (sessYear < admYear) map[sess] = 0;
-        });
-        return map;
-    }
-
-    function getStudentSessionLedger(student, sessionStr) {
-        const fee = parseInt(student?.monthlyFee, 10) || 150;
-        const sessions = getStudentSessions(student);
-        const sessionPaid = getStudentSessionPaidMap(student, sessions);
-        const cycles = generateSession12Cycles(student?.admissionDate || '2026-01-01', sessionStr);
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        const eligibleCycles = cycles.filter(c => c.status !== 'BEFORE_ADMISSION');
-        const expectedCycles = eligibleCycles.filter(c => c.dueDate <= today).length;
-        const paidCycles = Math.max(0, Math.min(12, parseInt(sessionPaid[sessionStr], 10) || 0));
-        const admissionSession = getStudentAdmissionSession(student);
-        const allTransactions = Array.isArray(student?.transactions) ? student.transactions : [];
-        const transactions = allTransactions.filter(tx => tx && (tx.session || admissionSession) === sessionStr);
-        const transactionAmount = transactions.reduce((sum, tx) => sum + (parseInt(tx?.amount, 10) || 0), 0);
-        const creditedAmount = Math.max(transactionAmount, paidCycles * fee);
-        const expectedAmount = expectedCycles * fee;
-        const nextCycle = eligibleCycles.find(c => c.dueDate > today);
-        return {
-            fee, cycles, expectedCycles, paidCycles, expectedAmount, transactionAmount,
-            creditedAmount, balance: expectedAmount - creditedAmount, transactions,
-            nextDueDate: nextCycle ? nextCycle.dueDate : null, sessions
-        };
-    }
-
-    function getCurrentActiveStudentSession(student, sessions = getStudentSessions(student)) {
-        const { year, month, day } = parseAdmissionDateParts(student?.admissionDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const anchorThisYear = dateForAnchoredMonth(today.getFullYear(), month, day);
-        let activeYear = today >= anchorThisYear ? today.getFullYear() : today.getFullYear() - 1;
-        activeYear = Math.max(year, activeYear);
-        const candidate = makeStudentSessionName(activeYear);
-        return sessions.includes(candidate) ? candidate : (sessions[0] || getStudentAdmissionSession(student));
-    }
-
-    function handleStudentSessionChange(sessionStr) {
-        if (!currentActiveStudent) return;
-        const sessions = getStudentSessions(currentActiveStudent);
-        if (!sessions.includes(sessionStr)) return;
-        activeStudentSession = sessionStr;
-        try { localStorage.setItem(`gtcStudentSession_${currentActiveStudent.id}`, sessionStr); } catch (e) {}
-        renderSelectedStudentSession(currentActiveStudent, sessionStr);
-    }
-
-    function renderSelectedStudentSession(student, sessionStr) {
-        const select = document.getElementById('student-session-select');
-        if (select && select.value !== sessionStr) select.value = sessionStr;
-        const ledger = getStudentSessionLedger(student, sessionStr);
-        const paidCount = ledger.paidCycles;
-        const currentLabel = `• Session ${sessionStr}`;
-        const headerSession = document.getElementById('header-session-label');
-        if (headerSession) {
-            headerSession.textContent = currentLabel;
-            headerSession.classList.add('gtc-header-session');
-        }
-        const trackerBadge = document.getElementById('session-tracker-badge');
-        if (trackerBadge) {
-            trackerBadge.classList.add('gtc-session-active');
-            trackerBadge.innerHTML = `<span class="gtc-session-dot w-2 h-2 rounded-full bg-cyan-400"></span> SESSION ${sessionStr} TRACKER`;
-        }
-        if (select) select.classList.add('gtc-session-active');
-
-        const label = document.getElementById('student-dues-label');
-        if (label) label.textContent = `Pending Dues · ${sessionStr}`;
-        const advanceLabel = document.getElementById('student-advance-label');
-        if (advanceLabel) advanceLabel.textContent = `Advance Credit · ${sessionStr}`;
-        document.getElementById('profile-cycles-badge').innerText = `${paidCount} / 12 Cycles Paid`;
-        const progressPercent = Math.min(100, Math.round((paidCount / 12) * 100));
-        document.getElementById('cycle-percentage-text').innerText = `${progressPercent}%`;
-        document.getElementById('cycle-progress-bar').style.width = `${progressPercent}%`;
-
-        const duesEl = document.getElementById('student-dues-display');
-        const advanceEl = document.getElementById('student-advance-display');
-        const duesSubtext = document.getElementById('dues-subtext');
-        if (ledger.balance > 0) {
-            duesEl.innerText = `₹${ledger.balance.toLocaleString('en-IN')}`;
-            advanceEl.innerText = '₹0';
-            duesSubtext.innerText = `${ledger.expectedCycles} monthly cycle(s) have matured in ${sessionStr}; see the cycle cards below.`;
-        } else if (ledger.balance < 0) {
-            duesEl.innerText = '₹0';
-            advanceEl.innerText = `₹${Math.abs(ledger.balance).toLocaleString('en-IN')}`;
-            duesSubtext.innerText = `This session has an advance credit balance.`;
-        } else {
-            duesEl.innerText = '₹0';
-            advanceEl.innerText = '₹0';
-            duesSubtext.innerText = ledger.nextDueDate
-                ? `No fee is due yet. Next fee due date: ${formatDate(ledger.nextDueDate)}.`
-                : `No outstanding fee is recorded for ${sessionStr}.`;
-        }
-
-        const sessionTransactions = ledger.transactions.slice().sort((a, b) => {
-            const da = new Date(a?.timestamp || a?.date || 0).getTime() || 0;
-            const db = new Date(b?.timestamp || b?.date || 0).getTime() || 0;
-            return da - db;
-        });
-        renderChecklist(student, sessionStr, ledger);
-        renderTransactions(sessionTransactions);
-        const scanSession = document.getElementById('scan-card-session');
-        if (scanSession) scanSession.textContent = `SESSION ${sessionStr}`;
-    }
-
-    function fetchStudentData() {
-        if (!studentPhone || studentPhone === "VERIFY_MODE") return;
-        if (!window.firebase || typeof db === 'undefined' || !db) {
-            showAlert("Connection Error", "Firebase load nahi hua. Internet aur Firebase SDK scripts check karke page refresh karein.", true);
-            document.getElementById('unauth-view').classList.remove('hidden');
-            return;
-        }
-
-        const studentsRef = db.ref('gtc_students');
-        if (studentDataListener) studentsRef.off('value', studentDataListener);
-        studentDataListener = (snapshot) => {
-            const raw = snapshot.val() || [];
-            const students = (Array.isArray(raw) ? raw : Object.values(raw)).filter(Boolean);
-            globalStudentsList = students.filter(s => String(s?.phone || '').trim() === String(studentPhone).trim());
-
-            if (globalStudentsList.length === 0) {
-                document.getElementById('dashboard-view').classList.add('hidden');
-                document.getElementById('selection-view').classList.add('hidden');
-                document.getElementById('unauth-view').classList.remove('hidden');
-                showAlert("Student Not Found", "Is mobile number se linked student record nahi mila. Registered number check karein.", true);
+        function handleProfilePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !currentActiveStudent) return;
+            if (!file.type.startsWith('image/')) {
+                showAlert("Invalid File", "Kripya JPG ya PNG image select karein!", true);
                 return;
             }
 
-            document.getElementById('unauth-view').classList.add('hidden');
-            if (globalStudentsList.length > 1) {
-                const selectedId = localStorage.getItem("selectedStudentId");
-                const studentToOpen = globalStudentsList.find(s => String(s.id) === String(selectedId));
-                if (studentToOpen) renderStudentDashboard(studentToOpen);
-                else renderSelectionScreen(globalStudentsList);
-            } else {
-                renderStudentDashboard(globalStudentsList[0]);
-            }
-        };
-        studentsRef.on('value', studentDataListener, (error) => {
-            console.error('[GTC Student Portal] Firebase read failed:', error);
-            document.getElementById('dashboard-view').classList.add('hidden');
-            document.getElementById('selection-view').classList.add('hidden');
-            document.getElementById('unauth-view').classList.remove('hidden');
-            showAlert("Firebase Connection Failed", `${error?.message || 'Database read failed'}. Firebase Realtime Database Rules aur registered student details check karein.`, true);
-        });
-    }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 220;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > MAX_SIZE) { h = Math.round((h * MAX_SIZE) / w); w = MAX_SIZE; }
+                    else if (h > MAX_SIZE) { w = Math.round((w * MAX_SIZE) / h); h = MAX_SIZE; }
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.78);
 
-    function renderSelectionScreen(list) {
-        document.getElementById('selection-view').classList.remove('hidden');
-        document.getElementById('dashboard-view').classList.add('hidden');
-        document.getElementById('switch-account-btn').classList.add('hidden');
-        
-        let html = "";
-        list.forEach(s => {
-            html += `
-                <div class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-slate-800 shadow-xl">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-black text-xl flex-shrink-0">
-                            ${s.avatar ? `<img src="${s.avatar}" class="w-full h-full object-cover rounded-2xl">` : s.name.charAt(0)}
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-white text-lg">${s.name}</h3>
-                            <p class="text-xs text-slate-400">Class: <span class="text-indigo-400 font-bold">${s.studentClass || 'Class 10th'}</span> | Father: ${s.fatherName}</p>
-                            <p class="text-[11px] text-slate-500 mt-1">Adm: ${s.admissionDate || '-'} • Fee: ₹${s.monthlyFee}/mo</p>
-                        </div>
-                    </div>
-                    <button onclick="selectAndOpenStudent('${s.id}')" class="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-5 py-3 rounded-2xl text-xs font-black transition shadow-md flex items-center justify-center gap-2">
-                        <span>Open Account</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            `;
-        });
-        document.getElementById('student-list-grid').innerHTML = html;
-    }
-
-    function selectAndOpenStudent(id) {
-        localStorage.setItem("selectedStudentId", id);
-        let student = globalStudentsList.find(s => s.id === id);
-        if (student) {
-            renderStudentDashboard(student);
-        }
-    }
-
-    function renderStudentDashboard(student) {
-        currentActiveStudent = student;
-        document.getElementById('selection-view').classList.add('hidden');
-        document.getElementById('dashboard-view').classList.remove('hidden');
-
-        if (globalStudentsList.length > 1) document.getElementById('switch-account-btn').classList.remove('hidden');
-        else document.getElementById('switch-account-btn').classList.add('hidden');
-
-        const name = student.name || 'Student';
-        document.getElementById('header-student-name').innerText = name;
-        const headerInitial = document.getElementById('student-initial');
-        if (student.avatar) headerInitial.innerHTML = `<img src="${student.avatar}" alt="Student photo" class="w-full h-full object-cover">`;
-        else headerInitial.innerText = name.charAt(0).toUpperCase();
-
-        document.getElementById('profile-name').innerText = name;
-        document.getElementById('profile-class').innerText = student.studentClass || 'Class 10th';
-        document.getElementById('profile-father').innerText = student.fatherName || '-';
-        document.getElementById('profile-phone').innerText = student.phone || '-';
-        document.getElementById('profile-fee').innerText = parseInt(student.monthlyFee, 10) || 150;
-        document.getElementById('profile-admission').innerText = student.admissionDate || '-';
-
-        const avatarImg = document.getElementById('student-avatar-img');
-        const avatarText = document.getElementById('student-avatar-text');
-        if (student.avatar) {
-            avatarImg.src = student.avatar;
-            avatarImg.classList.remove('hidden');
-            avatarText.classList.add('hidden');
-        } else {
-            avatarImg.classList.add('hidden');
-            avatarText.classList.remove('hidden');
-            avatarText.innerText = name.charAt(0).toUpperCase();
-        }
-
-        const sessions = getStudentSessions(student);
-        const select = document.getElementById('student-session-select');
-        select.innerHTML = sessions.map(sess => `<option value="${sess}">Session ${sess}</option>`).join('');
-        // Open the portal on the date-correct current session by default.
-        // The student can still manually select an older session afterwards.
-        let chosenSession = getCurrentActiveStudentSession(student, sessions);
-        if (!sessions.includes(chosenSession)) chosenSession = sessions[0];
-        lastDetectedAutoSession = chosenSession;
-        activeStudentSession = chosenSession;
-        try { localStorage.setItem(`gtcStudentSession_${student.id}`, chosenSession); } catch (e) {}
-        select.value = chosenSession;
-        renderSelectedStudentSession(student, chosenSession);
-    }
-
-    function renderChecklist(student, sessionStr, ledger) {
-        const grid = document.getElementById('billing-checklist-grid');
-        const cycles = ledger?.cycles || generateSession12Cycles(student.admissionDate || '2026-01-01', sessionStr);
-        const paidCount = ledger?.paidCycles || 0;
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        let html = '';
-
-        cycles.forEach((cycle, index) => {
-            const isBeforeAdmission = cycle.status === 'BEFORE_ADMISSION';
-            const isPaid = !isBeforeAdmission && index < paidCount;
-            const isDue = !isBeforeAdmission && cycle.dueDate <= today;
-            let cardStyle = 'bg-slate-950/70 border-slate-800 text-slate-300';
-            let badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">UPCOMING</span>`;
-            let icon = `<i class="fa-regular fa-clock text-slate-500"></i>`;
-
-            if (isBeforeAdmission) {
-                cardStyle = 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-70';
-                badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">BEFORE ADMISSION</span>`;
-                icon = `<i class="fa-solid fa-ban text-slate-600"></i>`;
-            } else if (isPaid) {
-                cardStyle = 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200';
-                badge = `<span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wider">✓ PAID</span>`;
-                icon = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>`;
-            } else if (isDue) {
-                cardStyle = 'bg-rose-950/25 border-rose-500/35 text-rose-200';
-                badge = `<span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 tracking-wider">⚠ DUE</span>`;
-                icon = `<i class="fa-solid fa-circle-exclamation text-rose-400 text-base"></i>`;
-            } else if (cycle.status === 'RUNNING') {
-                cardStyle = 'bg-cyan-950/30 border-cyan-500/50 text-cyan-200 ring-1 ring-cyan-500/30';
-                badge = `<span class="gtc-running-badge inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 tracking-wider"><span class="w-1.5 h-1.5 rounded-full bg-slate-950"></span>RUNNING · Due ${cycle.dueDateLabel}</span>`;
-                icon = `<i class="fa-solid fa-bolt text-cyan-400 text-base"></i>`;
-            } else {
-                badge = `<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 tracking-wider">UPCOMING · Due ${cycle.dueDateLabel}</span>`;
-            }
-
-            html += `
-                <div class="p-4 rounded-2xl border ${cardStyle} ${cycle.status === 'RUNNING' && !isPaid && !isDue && !isBeforeAdmission ? 'gtc-running-card' : ''} flex flex-col justify-between space-y-3 transition">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-black uppercase tracking-wider text-slate-300">Cycle ${index + 1}</span>
-                        <span>${icon}</span>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-snug">${cycle.title}</p>
-                    </div>
-                    <div class="pt-2.5 border-t border-slate-800/80 flex justify-between items-center gap-2">
-                        <span class="text-[11px] font-bold text-slate-400 uppercase">Status</span>
-                        <div class="text-right">${badge}</div>
-                    </div>
-                </div>`;
-        });
-        grid.innerHTML = html;
-    }
-
-    function renderTransactions(txs) {
-        const tbody = document.getElementById('transaction-history-body');
-        const mobileTxList = document.getElementById('mobile-tx-list');
-        const countLabel = document.getElementById('tx-total-count');
-
-        countLabel.innerText = `${(txs || []).length} Receipts`;
-
-        if(!txs || txs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500 italic">No payment receipts recorded yet.</td></tr>`;
-            mobileTxList.innerHTML = `<p class="p-4 text-center text-slate-500 italic text-sm">No transactions recorded yet.</p>`;
-            return;
-        }
-
-        let tableHtml = "";
-        let mobileHtml = "";
-
-        txs.slice().reverse().forEach(t => {
-            tableHtml += `
-                <tr class="hover:bg-slate-800/30 transition">
-                    <td class="p-3.5 font-black text-cyan-400 font-mono">${t.receiptId}</td>
-                    <td class="p-3.5 text-slate-300 font-medium text-xs">${t.date}</td>
-                    <td class="p-3.5 text-slate-300 font-semibold text-xs whitespace-pre-line">${t.cyclesCovered || '-'}</td>
-                    <td class="p-3.5 font-black text-emerald-400 text-base">₹${t.amount}</td>
-                    <td class="p-3.5"><span class="px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-300 rounded-lg text-xs font-bold">${t.mode}</span></td>
-                    <td class="p-3.5 text-right no-print">
-                        <button onclick="openReceiptSlip('${t.receiptId}')" class="bg-indigo-600/15 hover:bg-indigo-600/25 text-indigo-300 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-indigo-500/30">
-                            <i class="fa-solid fa-receipt mr-1"></i> Slip
-                        </button>
-                    </td>
-                </tr>
-            `;
-
-            mobileHtml += `
-                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-2.5">
-                    <div class="flex justify-between items-center">
-                        <span class="font-black text-cyan-400 text-xs font-mono">${t.receiptId}</span>
-                        <span class="font-black text-emerald-400 text-base">₹${t.amount}</span>
-                    </div>
-                    <p class="text-xs text-slate-200 font-semibold whitespace-pre-line">${t.cyclesCovered || '-'}</p>
-                    <div class="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-900">
-                        <span class="font-medium text-[11px]">${t.date}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="bg-slate-900 text-slate-300 px-2 py-0.5 rounded font-bold text-[10px]">${t.mode}</span>
-                            <button onclick="openReceiptSlip('${t.receiptId}')" class="text-indigo-400 font-bold text-xs underline">Receipt Slip</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        tbody.innerHTML = tableHtml;
-        mobileTxList.innerHTML = mobileHtml;
-    }
-
-    // INDIVIDUAL RECEIPT SLIP PREVIEW & ISOLATED PRINT
-    function openReceiptSlip(receiptId) {
-        if (!currentActiveStudent) return;
-        const tx = (currentActiveStudent.transactions || []).find(t => t.receiptId === receiptId);
-        if (!tx) return;
-
-        document.getElementById('rcpt-id').innerText = tx.receiptId;
-        document.getElementById('rcpt-name').innerText = currentActiveStudent.name;
-        document.getElementById('rcpt-class').innerText = currentActiveStudent.studentClass || 'Class 10th';
-        document.getElementById('rcpt-father').innerText = currentActiveStudent.fatherName;
-        document.getElementById('rcpt-date').innerText = tx.date || '-';
-        const txSession = tx.session || getStudentAdmissionSession(currentActiveStudent);
-        const receiptSessionLabel = document.getElementById('rcpt-session-label');
-        if (receiptSessionLabel) receiptSessionLabel.textContent = `Session ${txSession}`;
-        document.getElementById('rcpt-cycles').innerText = tx.cyclesCovered || 'Monthly Fee';
-        document.getElementById('rcpt-mode').innerText = tx.mode || 'Online / UPI';
-        document.getElementById('rcpt-amount').innerText = `₹${tx.amount}`;
-
-        const modal = document.getElementById('receipt-modal');
-        const box = document.getElementById('receipt-modal-box');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
-    }
-
-    function closeReceiptModal() {
-        const modal = document.getElementById('receipt-modal');
-        const box = document.getElementById('receipt-modal-box');
-        modal.classList.add('opacity-0');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    // EXACT SINGLE SLIP PRINTER (Prints ONLY the slip modal)
-    function printReceiptSlip() {
-        document.body.classList.add('printing-single-slip');
-        
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-single-slip');
-            }, 600);
-        }, 60);
-    }
-
-    // Print Full Statement (Dashboard & Ledger Table)
-    function printFullStatement() {
-        document.body.classList.remove('printing-single-slip');
-        window.print();
-    }
-
-    window.addEventListener('afterprint', () => {
-        document.body.classList.remove('printing-single-slip');
-    });
-
-    // UPI CHECKOUT MODAL LOGIC
-    function openPaymentQR() {
-        if (!currentActiveStudent || !activeStudentSession) {
-            showAlert("Student Not Selected", "Pehle student profile aur fee session select karein.", true);
-            return;
-        }
-        const ledger = getStudentSessionLedger(currentActiveStudent, activeStudentSession);
-        const amountVal = Math.max(0, ledger.balance);
-        if (amountVal <= 0) {
-            showAlert("No Fee Due Yet", ledger.nextDueDate
-                ? `Is session ki koi fee abhi due nahi hai. Agli fee ${formatDate(ledger.nextDueDate)} ko due hogi.`
-                : `Is session mein abhi koi pending fee nahi hai.`, false);
-            return;
-        }
-        document.getElementById('qr-amount').innerText = amountVal;
-
-        const upiString = `upi://pay?pa=8217598939-3@ybl&pn=Gautam%20Teaching%20Center&am=${amountVal}&cu=INR&tn=Fee%20Payment%20${encodeURIComponent(currentActiveStudent ? currentActiveStudent.name : 'Student')}`;
-        
-        const gpayBtn = document.getElementById('gtc-gpay-link');
-        if (gpayBtn) {
-            gpayBtn.setAttribute('href', upiString);
-        }
-
-        document.getElementById('qr-image-tag').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiString)}`;
-        document.getElementById('copy-btn-text').innerText = "Copy";
-
-        const waMsg = `नमस्ते Gautam Sir, maine ${currentActiveStudent?.name || 'Student'} ki coaching fee ₹${amountVal} Online UPI se pay kar di hai. Kripya receipt verify karein.`;
-        document.getElementById('wa-screenshot-link').href = `https://wa.me/918217598939?text=${encodeURIComponent(waMsg)}`;
-
-        const modal = document.getElementById('qr-payment-modal');
-        const box = document.getElementById('qr-modal-box');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
-    }
-
-    function copyUPIId() {
-        const upiId = "8217598939-3@ybl";
-        navigator.clipboard.writeText(upiId).then(() => {
-            const btnText = document.getElementById('copy-btn-text');
-            btnText.innerText = "Copied! ✓";
-            setTimeout(() => {
-                btnText.innerText = "Copy";
-            }, 2000);
-        }).catch(() => {
-            prompt("Copy this UPI ID:", upiId);
-        });
-    }
-
-    function closeQRModal() {
-        const modal = document.getElementById('qr-payment-modal');
-        const box = document.getElementById('qr-modal-box');
-        modal.classList.add('opacity-0');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    // PROFILE PHOTO COMPRESSION & UPLOAD
-    function handleProfilePhotoUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            showAlert("Invalid File", "Kripya valid image file (JPG ya PNG) select karein!", true);
-            return;
-        }
-
-        showAlert("Processing Photo...", "Photo optimize hokar cloud par sync ho rahi hai...");
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const MAX_SIZE = 260;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_SIZE) {
-                        height = Math.round((height * MAX_SIZE) / width);
-                        width = MAX_SIZE;
+                    const fbKey = currentActiveStudent._fbKey;
+                    if (fbKey !== undefined && fbKey !== null && fbKey !== "") {
+                        db.ref(`gtc_students/${fbKey}/avatar`).set(base64).then(() => {
+                            showAlert("Photo Updated ✓", "Aapki profile photo cloud par save ho gayi hai.");
+                        }).catch(err => showAlert("Error", err.message, true));
                     }
-                } else {
-                    if (height > MAX_SIZE) {
-                        width = Math.round((width * MAX_SIZE) / height);
-                        height = MAX_SIZE;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.82);
-
-                db.ref('gtc_students').once('value').then((snapshot) => {
-                    const rawStudents = snapshot.val() || [];
-                    let students = Array.isArray(rawStudents) ? rawStudents.filter(Boolean) : Object.values(rawStudents).filter(Boolean);
-                    const index = students.findIndex(s => String(s.id) === String(currentActiveStudent.id));
-                    if (index !== -1) {
-                        students[index].avatar = optimizedBase64;
-                        db.ref('gtc_students').set(students).then(() => {
-                            currentActiveStudent.avatar = optimizedBase64;
-                            
-                            const avatarImg = document.getElementById('student-avatar-img');
-                            const avatarText = document.getElementById('student-avatar-text');
-                            avatarImg.src = optimizedBase64;
-                            avatarImg.classList.remove('hidden');
-                            avatarText.classList.add('hidden');
-
-                            const headerInitial = document.getElementById('student-initial');
-                            if (headerInitial) {
-                            headerInitial.innerHTML = `<img src="${optimizedBase64}" class="w-full h-full object-cover">`;
-                            }
-                            showAlert("Photo Updated! ✓", "Aapki profile photo safalta-purvak cloud pe save ho gayi hai.");
-                        }).catch((err) => {
-                            showAlert("Error", "Photo save karne me dikkat aayi: " + err.message, true);
-                        });
-                    }
-                });
+                };
+                img.src = e.target.result;
             };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function refreshData() {
-        fetchStudentData();
-        showAlert("Live Cloud Sync", "Firebase se latest record mangwaya ja raha hai. Update na aaye to connection error check karein.");
-    }
-
-    function showAlert(title, message, isError = false) {
-        document.getElementById('alert-title').innerText = title;
-        document.getElementById('alert-message').innerText = message;
-        const icon = document.getElementById('alert-icon');
-        if(isError) {
-            icon.className = "w-13 h-13 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3 text-2xl font-bold border border-rose-500/30";
-            icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
-        } else {
-            icon.className = "w-13 h-13 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto mb-3 text-2xl font-bold border border-cyan-500/30";
-            icon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+            reader.readAsDataURL(file);
         }
 
-        const modal = document.getElementById('custom-alert-modal');
-        const box = document.getElementById('alert-modal-box');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            box.classList.remove('scale-95');
-            box.classList.add('scale-100');
-        }, 10);
-    }
-
-    function closeAlertModal() {
-        const modal = document.getElementById('custom-alert-modal');
-        const box = document.getElementById('alert-modal-box');
-        modal.classList.add('opacity-0');
-        box.classList.remove('scale-100');
-        box.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    // INITIALIZATION
-    function initPortal() {
-        const isScanning = checkURLForScannedID();
-        if (isScanning) return;
-
-        if (!studentPhone) {
-            document.getElementById('unauth-view').classList.remove('hidden');
-        } else {
+        function refreshData() {
+            cyclesCache.clear();
             fetchStudentData();
+            showAlert("Synced ✓", "Latest cloud ledger data refresh ho gaya hai.");
         }
-    }
 
-    initPortal();
-
-    // Refresh the running-month status as dates change, even if the portal stays open.
-    // If the annual session rolls over, auto-switch only when the user was on the previous auto session.
-    let gtcLastDateKey = new Date().toDateString();
-    setInterval(() => {
-        if (!currentActiveStudent || !activeStudentSession) return;
-        const now = new Date();
-        const dateKey = now.toDateString();
-        if (dateKey === gtcLastDateKey) return;
-        gtcLastDateKey = dateKey;
-
-        const sessions = getStudentSessions(currentActiveStudent);
-        const autoSessionNow = getCurrentActiveStudentSession(currentActiveStudent, sessions);
-        if (lastDetectedAutoSession && autoSessionNow !== lastDetectedAutoSession) {
-            if (activeStudentSession === lastDetectedAutoSession) {
-                activeStudentSession = autoSessionNow;
-                try { localStorage.setItem(`gtcStudentSession_${currentActiveStudent.id}`, autoSessionNow); } catch (e) {}
-                const selector = document.getElementById('student-session-select');
-                if (selector) selector.value = autoSessionNow;
+        function showAlert(title, message, isError = false) {
+            document.getElementById('alert-title').textContent = title;
+            document.getElementById('alert-message').textContent = message;
+            const icon = document.getElementById('alert-icon');
+            if (isError) {
+                icon.style.background = "var(--rose-soft)";
+                icon.style.color = "var(--rose)";
+                icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+            } else {
+                icon.style.background = "var(--emerald-soft)";
+                icon.style.color = "var(--emerald)";
+                icon.innerHTML = `<i class="fa-solid fa-check"></i>`;
             }
-            lastDetectedAutoSession = autoSessionNow;
+            document.getElementById('custom-alert-modal').classList.add('open');
         }
-        // Recalculate cycle status daily so the RUNNING badge moves to the next cycle automatically.
-        renderSelectedStudentSession(currentActiveStudent, activeStudentSession);
-    }, 60 * 1000);
-</script>
+
+        function closeAlertModal() {
+            document.getElementById('custom-alert-modal').classList.remove('open');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkURLForScannedID()) return;
+            if (!studentPhone) {
+                document.getElementById('unauth-view').classList.add('open');
+            } else {
+                fetchStudentData();
+            }
+        });
+    </script>
 </body>
 </html>
