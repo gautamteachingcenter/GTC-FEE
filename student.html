@@ -2,9 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- FORCE DESKTOP MODE ON MOBILE & TABLET -->
+    <meta id="gtc-desktop-viewport" name="viewport" content="width=1220, initial-scale=0.33, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes">
     <meta name="theme-color" content="#0f172a">
-    <title>Gautam Teaching Center | Student Fee Portal</title>
+    <title>Gautam Teaching Center | Student Fee Portal (Desktop View)</title>
+
+    <!-- STRICT ROUTE GUARD + FORCE DESKTOP VIEWPORT SCRIPT -->
+    <script>
+        (function enforceIndexFirstAndDesktopMode() {
+            // 1. Force Desktop Mode scaling on mobile phones
+            try {
+                var vp = document.getElementById('gtc-desktop-viewport');
+                var screenW = Math.min(window.screen.width || 390, window.innerWidth || 390);
+                if (vp && screenW > 0 && screenW < 1220) {
+                    var scale = Math.max(0.25, Math.min(1, +(screenW / 1220).toFixed(3)));
+                    vp.setAttribute('content', 'width=1220, initial-scale=' + scale + ', minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes');
+                }
+            } catch (e) {}
+
+            // 2. Always open index.html first unless verified via index.html in this session (or QR verify=1)
+            var isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
+            if (isSandboxedPreview) return;
+
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('verify') === '1') return;
+
+                var phone = localStorage.getItem("studentPhone");
+                var loggedInFromIndex = sessionStorage.getItem("studentLoggedInSession") === "true";
+
+                if (!phone || !loggedInFromIndex) {
+                    window.location.replace(new URL("index.html", window.location.href).href);
+                }
+            } catch (e) {
+                window.location.href = "index.html";
+            }
+        })();
+    </script>
 
     <!-- Firebase Realtime Database SDK (Compat v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -60,6 +94,7 @@
         }
 
         html, body {
+            min-width: 1220px;
             min-height: 100vh;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-body);
@@ -588,46 +623,12 @@
             margin: auto;
         }
 
-        @media (max-width: 900px) {
-            .overview-grid {
-                grid-template-columns: 1fr;
-            }
-            .cycles-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 640px) {
-            .profile-top {
-                flex-direction: column;
-                text-align: center;
-            }
-            .name-row {
-                justify-content: center;
-            }
-            .meta-list {
-                grid-template-columns: 1fr;
-                text-align: left;
-                background: var(--bg-subtle);
-                padding: 10px 12px;
-                border-radius: 10px;
-            }
-            .cycles-grid {
-                grid-template-columns: 1fr;
-            }
-            .desktop-tx-wrap {
-                display: none;
-            }
-            .mobile-tx-wrap {
-                display: flex;
-            }
-        }
-
         /* ==========================================================================
            PRINT ENGINE: DUAL-MODE (SINGLE SLIP vs FULL STATEMENT)
            ========================================================================== */
         @media print {
-            body {
+            html, body {
+                min-width: 0 !important;
                 background: white !important;
                 color: #09090b !important;
                 -webkit-print-color-adjust: exact !important;
@@ -1183,7 +1184,11 @@
         function checkStudentAuth() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('verify') === '1') return "VERIFY_MODE";
-            return localStorage.getItem("studentPhone") || null;
+            const phone = localStorage.getItem("studentPhone");
+            const loggedInFromIndex = sessionStorage.getItem("studentLoggedInSession") === "true";
+            const isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
+            if (!phone || (!loggedInFromIndex && !isSandboxedPreview)) return null;
+            return phone;
         }
 
         let studentPhone = checkStudentAuth();
@@ -1191,6 +1196,7 @@
         function handleLogout() {
             localStorage.removeItem("studentPhone");
             localStorage.removeItem("selectedStudentId");
+            sessionStorage.removeItem("studentLoggedInSession");
             window.location.href = "index.html";
         }
 
@@ -1202,6 +1208,7 @@
             }
             studentPhone = inputVal;
             localStorage.setItem("studentPhone", inputVal);
+            sessionStorage.setItem("studentLoggedInSession", "true");
             document.getElementById('unauth-view').classList.remove('open');
             fetchStudentData();
         }
@@ -1963,7 +1970,12 @@
         window.addEventListener('DOMContentLoaded', () => {
             if (checkURLForScannedID()) return;
             if (!studentPhone) {
-                document.getElementById('unauth-view').classList.add('open');
+                const isSandboxedPreview = window.location.protocol === 'blob:' || !window.location.protocol.startsWith('http');
+                if (isSandboxedPreview) {
+                    document.getElementById('unauth-view').classList.add('open');
+                } else {
+                    window.location.replace("index.html");
+                }
             } else {
                 fetchStudentData();
             }
