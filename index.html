@@ -3,266 +3,824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gautam Teaching Center - Fee Portal</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <meta name="theme-color" content="#0f172a">
+    <title>Gautam Teaching Center — Student Fee Portal</title>
+
     <!-- Firebase App & Realtime Database SDK (Compat v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts: Plus Jakarta Sans -->
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #070b14;
-            color: #f1f5f9;
+        :root {
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --text-main: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --primary-border: #c7d2fe;
+            --cyan: #0284c7;
+            --cyan-soft: #f0f9ff;
+            --cyan-border: #bae6fd;
+            --emerald: #059669;
+            --emerald-soft: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --amber: #d97706;
+            --amber-soft: #fffbeb;
+            --amber-border: #fde68a;
+            --rose: #e11d48;
+            --rose-soft: #fff1f2;
+            --rose-border: #fecdd3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(2, 132, 199, 0.06) 0px, transparent 50%),
+                radial-gradient(#cbd5e1 0.85px, transparent 0.85px);
+            background-size: 100% 100%, 100% 100%, 24px 24px;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Subtle modern grid pattern */
-        .bg-grid-pattern {
-            background-image: radial-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px);
-            background-size: 28px 28px;
+        button, input, a {
+            font: inherit;
         }
 
-        /* Glassmorphism panel */
-        .glass-card {
-            background: rgba(15, 23, 42, 0.78);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        a {
+            color: inherit;
+            text-decoration: none;
         }
 
-        /* Custom glow animation */
-        @keyframes subtlePulse {
-            0%, 100% { opacity: 0.35; transform: scale(1); }
-            50% { opacity: 0.65; transform: scale(1.05); }
+        /* Top Navigation Header */
+        header {
+            background: #0f172a;
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 30;
         }
-        .animate-subtle-glow {
-            animation: subtlePulse 7s infinite ease-in-out;
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 13px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%);
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.14);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .cloud-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .dot-live {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        /* Main Hero & Login Grid */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 20px;
+        }
+
+        .portal-grid {
+            width: 100%;
+            max-width: 1120px;
+            display: grid;
+            grid-template-columns: 1.12fr 0.88fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        /* Left Column: Institute Branding & Features */
+        .hero-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .eyebrow-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+            padding: 6px 13px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            border: 1px solid var(--primary-border);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .hero-heading {
+            font-size: clamp(28px, 3.8vw, 44px);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1.2px;
+            color: var(--text-main);
+        }
+
+        .hero-heading span {
+            background: linear-gradient(95deg, #4f46e5 0%, #0284c7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            max-width: 520px;
+            font-weight: 500;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+            transition: border-color 0.15s, transform 0.15s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-border);
+            transform: translateY(-1px);
+        }
+
+        .f-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .feature-card h4 {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .feature-card p {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .support-strip {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px 16px;
+            border-radius: 14px;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 12.5px;
+        }
+
+        .wa-support-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 9px;
+            background: #10b981;
+            color: #042f2e;
+            font-size: 12px;
+            font-weight: 800;
+            transition: opacity 0.15s;
+        }
+
+        .wa-support-btn:hover {
+            opacity: 0.92;
+        }
+
+        /* Right Column: Login Card */
+        .login-col {
+            width: 100%;
+            max-width: 440px;
+            justify-self: end;
+        }
+
+        .resume-card {
+            display: none;
+            margin-bottom: 14px;
+            padding: 13px 15px;
+            border-radius: 14px;
+            background: var(--emerald-soft);
+            border: 1px solid var(--emerald-border);
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .resume-card.show {
+            display: flex;
+        }
+
+        .resume-info {
+            font-size: 12px;
+            color: #065f46;
+            font-weight: 700;
+        }
+
+        .resume-info span {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #047857;
+            margin-top: 1px;
+        }
+
+        .resume-open-btn {
+            padding: 8px 13px;
+            border-radius: 9px;
+            border: none;
+            background: var(--emerald);
+            color: #ffffff;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .login-card {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            padding: 32px 28px;
+            box-shadow: 0 18px 40px -12px rgba(15, 23, 42, 0.1);
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #0284c7, #10b981);
+        }
+
+        .card-head {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .grad-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 14px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%);
+            color: #ffffff;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+        }
+
+        .card-head h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            color: var(--text-main);
+        }
+
+        .card-head p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .field-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+        }
+
+        .phone-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix-tag {
+            position: absolute;
+            left: 14px;
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #334155;
+            padding-right: 10px;
+            border-right: 1.5px solid #cbd5e1;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .phone-input {
+            width: 100%;
+            height: 52px;
+            padding: 0 38px 0 78px;
+            border-radius: 13px;
+            border: 1.5px solid var(--border-strong);
+            background: #f8fafc;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            outline: none;
+            transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+        }
+
+        .phone-input::placeholder {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0;
+            color: #94a3b8;
+        }
+
+        .phone-input:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 11px;
+            cursor: pointer;
+            display: none;
+            place-items: center;
+        }
+
+        .clear-btn.show {
+            display: grid;
+        }
+
+        .input-hint {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 7px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 52px;
+            margin-top: 18px;
+            border-radius: 13px;
+            border: none;
+            background: linear-gradient(100deg, #4f46e5 0%, #4338ca 55%, #0284c7 100%);
+            color: #ffffff;
+            font-size: 14.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            box-shadow: 0 10px 22px -6px rgba(79, 70, 229, 0.4);
+            transition: transform 0.12s, opacity 0.15s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .error-box {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 11px;
+            background: var(--rose-soft);
+            border: 1px solid var(--rose-border);
+            color: #be123c;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .error-box.show {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .trust-footer {
+            margin-top: 22px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .trust-footer span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 14px 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        @media (max-width: 920px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .login-col {
+                justify-self: center;
+                max-width: 460px;
+                order: -1;
+            }
+            .hero-col {
+                text-align: center;
+                align-items: center;
+            }
+            .eyebrow-badge {
+                align-self: center;
+            }
+            .feature-card {
+                text-align: left;
+            }
+            .support-strip {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .session-pill {
+                display: none;
+            }
+            main {
+                padding: 22px 14px;
+            }
+            .login-card {
+                padding: 26px 20px;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+                width: 100%;
+            }
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white bg-grid-pattern relative overflow-x-hidden">
+<body>
 
-    <!-- Ambient Glow Lights -->
-    <div class="fixed top-12 -left-28 w-96 h-96 bg-indigo-600/20 rounded-full blur-[130px] pointer-events-none animate-subtle-glow"></div>
-    <div class="fixed bottom-12 -right-28 w-96 h-96 bg-cyan-500/15 rounded-full blur-[130px] pointer-events-none animate-subtle-glow"></div>
-
-    <!-- CLOUD DATA SYNC / SPLASH SCREEN -->
-    <div id="sync-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 transition-opacity duration-300">
-        <div class="relative w-20 h-20 mb-6">
-            <div class="absolute inset-0 border-4 border-cyan-500/15 rounded-3xl"></div>
-            <div class="absolute inset-0 border-4 border-cyan-400 rounded-3xl animate-spin border-t-transparent shadow-lg shadow-cyan-500/20"></div>
-            <div class="absolute inset-0 flex items-center justify-center font-black text-cyan-400 text-2xl tracking-wider">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-        </div>
-        <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white text-center">Gautam Teaching Center</h2>
-        <p id="sync-status" class="text-slate-400 mt-2 text-xs sm:text-sm font-semibold flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            Connecting Live Cloud Database...
-        </p>
-        <div class="w-48 h-1.5 bg-slate-800 rounded-full mt-6 overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 w-2/3 animate-pulse"></div>
-        </div>
-        <p class="text-[11px] text-slate-500 mt-4 tracking-wide font-medium">Official Cloud Ledger & Student Verification</p>
-    </div>
-
-    <!-- TOP NAVIGATION BAR -->
-    <header class="w-full border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-xl z-30">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-cyan-500/20 border border-cyan-400/30">
+    <!-- TOP BAR -->
+    <header>
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-icon">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-snug">Gautam Teaching Center</h1>
-                    <p class="text-[10px] text-slate-400 font-medium">Fee Management & Verification System</p>
+                    <div class="brand-title">Gautam Teaching Center</div>
+                    <div class="brand-sub">Official Student Fee &amp; Digital ID Portal</div>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] font-bold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Session 2026-27 Active
+            <div class="header-badges">
+                <span class="session-pill">
+                    <span class="dot-live"></span>
+                    <span>Session 2026-27 Active</span>
                 </span>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold">
-                    <i class="fa-solid fa-shield-halved text-cyan-400 text-[11px]"></i>
-                    <span class="text-[11px]">Verified</span>
+                <span class="cloud-pill" id="cloud-status-pill">
+                    <i class="fa-solid fa-cloud" style="color:#38bdf8;"></i>
+                    <span id="cloud-status-text">Cloud Ready</span>
                 </span>
             </div>
         </div>
     </header>
 
     <!-- MAIN PORTAL BODY -->
-    <main class="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 z-20">
-        <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            <!-- LEFT COLUMN: INSTITUTE BRANDING & HIGHLIGHTS -->
-            <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-extrabold tracking-wide uppercase">
-                    <i class="fa-solid fa-bolt text-cyan-400 text-xs"></i>
-                    <span>Real-time Cloud Ledger</span>
+    <main>
+        <div class="portal-grid">
+
+            <!-- LEFT COLUMN: BRANDING & CAPABILITIES -->
+            <section class="hero-col">
+                <div class="eyebrow-badge">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Real-Time Cloud Fee Ledger</span>
                 </div>
 
-                <div class="space-y-3">
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                        Check Monthly Dues & <span class="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Fee Receipts</span> Instantly.
-                    </h2>
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0">
-                        Apne registered mobile number se login karein aur coaching fees, payment statements, aur verified ID card dekhein.
-                    </p>
-                </div>
+                <h1 class="hero-heading">
+                    Check Monthly Dues, Cycles &amp; <span>Fee Receipts</span> Instantly.
+                </h1>
 
-                <!-- Feature Badges -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center space-x-3 text-left">
-                        <div class="w-9 h-9 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-sm flex-shrink-0">
+                <p class="hero-desc">
+                    Apne 10-digit registered mobile number se login karein aur apna complete coaching fee statement, 12-month billing cycles, aur QR-verified Student ID Card dekhein.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="f-icon" style="background:var(--primary-soft);color:var(--primary);">
                             <i class="fa-solid fa-receipt"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-extrabold text-white">Instant Fee Receipts</h4>
-                            <p class="text-[11px] text-slate-400">Download & print receipts</p>
+                            <h4>Official Fee Receipts</h4>
+                            <p>View &amp; print verified payment slips anytime</p>
                         </div>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center space-x-3 text-left">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0">
+                    <div class="feature-card">
+                        <div class="f-icon" style="background:var(--emerald-soft);color:var(--emerald);">
                             <i class="fa-brands fa-google-pay"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-extrabold text-white">Direct UPI Payment</h4>
-                            <p class="text-[11px] text-slate-400">GPay, PhonePe, Paytm</p>
+                            <h4>Direct UPI Payment</h4>
+                            <p>Pay via Google Pay, PhonePe or QR code</p>
                         </div>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center space-x-3 text-left">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-sm flex-shrink-0">
+                    <div class="feature-card">
+                        <div class="f-icon" style="background:var(--cyan-soft);color:var(--cyan);">
                             <i class="fa-solid fa-id-card"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-extrabold text-white">Digital Student ID</h4>
-                            <p class="text-[11px] text-slate-400">QR code cloud verification</p>
+                            <h4>Digital Student ID Card</h4>
+                            <p>Instant QR-verified student identity pass</p>
                         </div>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center space-x-3 text-left">
-                        <div class="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-sm flex-shrink-0">
+                    <div class="feature-card">
+                        <div class="f-icon" style="background:var(--amber-soft);color:var(--amber);">
                             <i class="fa-solid fa-calendar-check"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-extrabold text-white">12-Month Cycles</h4>
-                            <p class="text-[11px] text-slate-400">Automated cycle tracker</p>
+                            <h4>12-Month Cycle Tracker</h4>
+                            <p>Transparent session-wise fee calculation</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- RIGHT COLUMN: LOGIN CARD (STUDENT ONLY) -->
-            <div class="lg:col-span-6 w-full max-w-md mx-auto">
-                <div id="login-container" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative transition-all duration-300">
-                    
-                    <!-- CARD HEADER -->
-                    <div class="text-center mb-6">
-                        <div class="w-13 h-13 sm:w-14 sm:h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-600/30">
+                <div class="support-strip">
+                    <div>
+                        <strong style="display:block;font-size:13px;">Need Help with Login or Fee Status?</strong>
+                        <span style="font-size:11.5px;color:#94a3b8;">Direct Helpline: +91 8217598939 (Gautam Sir)</span>
+                    </div>
+                    <a href="https://wa.me/918217598939?text=Namaste%20Gautam%20Sir%2C%20mujhe%20Student%20Fee%20Portal%20login%20me%20help%20chahiye." target="_blank" rel="noopener noreferrer" class="wa-support-btn">
+                        <i class="fa-brands fa-whatsapp" style="font-size:14px;"></i>
+                        <span>WhatsApp Sir</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: STUDENT LOGIN CARD -->
+            <section class="login-col">
+
+                <!-- 1-Tap Quick Resume Banner if student logged in earlier -->
+                <div id="resume-login-card" class="resume-card">
+                    <div class="resume-info">
+                        <i class="fa-solid fa-circle-check" style="color:var(--emerald);margin-right:4px;"></i>
+                        Saved Student Account Found
+                        <span id="resume-phone-label">+91 ----------</span>
+                    </div>
+                    <button type="button" id="resume-open-btn" class="resume-open-btn">
+                        Open Portal <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="login-card">
+                    <div class="card-head">
+                        <div class="grad-icon">
                             <i class="fa-solid fa-user-graduate"></i>
                         </div>
-                        <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight" id="login-heading">Student Portal Login</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-1" id="login-subheading">Apna registered mobile number enter karein</p>
+                        <h2>Student Portal Login</h2>
+                        <p>Enter your registered 10-digit mobile number</p>
                     </div>
 
-                    <!-- STUDENT LOGIN FORM -->
-                    <div id="form-student" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
-                                Registered Mobile Number
-                            </label>
-                            <div class="relative flex items-center">
-                                <div class="absolute left-3.5 flex items-center gap-1.5 pr-2 border-r border-slate-700 text-slate-400 text-xs font-bold select-none">
-                                    <span>🇮🇳</span>
-                                    <span>+91</span>
-                                </div>
-                                <input 
-                                    type="tel" 
-                                    id="student-phone" 
-                                    name="gtc_stu_phone_clean"
-                                    maxlength="10" 
-                                    inputmode="numeric" 
-                                    placeholder="10-digit number" 
-                                    autocomplete="off"
-                                    class="w-full bg-slate-950/90 border border-slate-800 rounded-2xl pl-20 pr-4 py-3.5 text-white text-base font-bold tracking-wider placeholder:text-slate-600 placeholder:font-medium focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition shadow-inner">
-                            </div>
-                            <div class="flex justify-between items-center mt-1.5 text-[11px] text-slate-500">
-                                <span>Example: 9142754164</span>
-                                <span id="phone-digit-count" class="font-mono text-slate-400">0/10</span>
-                            </div>
+                    <div>
+                        <div class="field-label">
+                            <span>Registered Mobile Number</span>
+                            <span id="phone-digit-count" style="font-family:'JetBrains Mono',monospace;color:var(--text-muted);">0 / 10</span>
                         </div>
 
-                        <button 
-                            type="button" 
-                            id="btn-student-login"
-                            onclick="handleStudentLogin()" 
-                            class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-extrabold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-cyan-600/25 text-sm flex items-center justify-center gap-2 group active:scale-[0.99]">
-                            <i class="fa-solid fa-magnifying-glass text-xs group-hover:scale-110 transition-transform"></i>
-                            <span id="btn-student-text">Check Dues & Receipts</span>
-                            <i class="fa-solid fa-spinner animate-spin hidden text-sm ml-1" id="student-spinner"></i>
+                        <div class="phone-box">
+                            <span class="prefix-tag">🇮🇳 +91</span>
+                            <input
+                                type="tel"
+                                id="student-phone"
+                                maxlength="10"
+                                inputmode="numeric"
+                                placeholder="Enter 10-digit number"
+                                autocomplete="off"
+                                class="phone-input">
+                            <button type="button" id="clear-phone-btn" class="clear-btn" title="Clear number">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="input-hint">
+                            <span>Use coaching registered number</span>
+                            <span id="phone-valid-tag" style="font-weight:700;color:var(--emerald);display:none;">✓ Ready to verify</span>
+                        </div>
+
+                        <div id="login-error-msg" class="error-box" role="alert">
+                            <i class="fa-solid fa-circle-exclamation" style="margin-top:2px;"></i>
+                            <span id="login-error-text"></span>
+                        </div>
+
+                        <button type="button" id="btn-student-login" onclick="handleStudentLogin()" class="submit-btn">
+                            <i class="fa-solid fa-magnifying-glass" id="btn-icon"></i>
+                            <span id="btn-student-text">Check Fee Dues &amp; Receipts</span>
                         </button>
                     </div>
 
-                    <!-- FOOTER HELP -->
-                    <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
-                        <p class="text-xs text-slate-400">
-                            Assistance & Inquiries: Gautam Sir at 
-                            <span class="text-cyan-400 font-extrabold select-none inline-block px-1">
-                                +91 8217598939
-                            </span>
-                        </p>
+                    <div class="trust-footer">
+                        <span>
+                            <i class="fa-solid fa-shield-halved" style="color:var(--emerald);"></i>
+                            Verified Cloud Records
+                        </span>
+                        <span>
+                            <i class="fa-solid fa-lock" style="color:var(--primary);"></i>
+                            Instant Access
+                        </span>
                     </div>
-
                 </div>
-            </div>
+            </section>
 
         </div>
     </main>
 
-    <!-- FOOTER COPYRIGHT & INFO -->
-    <footer class="w-full border-t border-slate-900 bg-slate-950/80 backdrop-blur-md py-4 text-center text-xs text-slate-500 z-20">
-        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <p>© 2026 Gautam Teaching Center. All rights reserved.</p>
-            <p class="flex items-center gap-3 text-[11px]">
-                <span class="inline-flex items-center gap-1 text-slate-400"><i class="fa-solid fa-lock text-emerald-400"></i> SSL 256-Bit Encrypted</span>
-                <span>•</span>
-                <span class="text-slate-400">Powered by Live Cloud DB</span>
-            </p>
+    <footer>
+        <div class="footer-inner">
+            <div>© <span id="current-year">2026</span> <strong>Gautam Teaching Center</strong>. All rights reserved.</div>
+            <div>Designed for Students &amp; Parents • Multi-Session Cloud Edition</div>
         </div>
     </footer>
 
-    <!-- POPUP MODAL -->
-    <div id="custom-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 max-w-sm w-full mx-4 shadow-2xl text-center transform scale-95 transition-transform duration-300" id="modal-box">
-            <div id="modal-icon" class="w-13 h-13 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4 text-xl font-bold border border-rose-500/30">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <h3 id="modal-title" class="text-base font-bold text-white mb-2">Notice</h3>
-            <p id="modal-message" class="text-slate-400 text-xs leading-relaxed mb-6">Error details here.</p>
-            <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-2xl transition-all border border-slate-700 text-xs">
-                ठीक है (OK)
-            </button>
-        </div>
-    </div>
-
     <script>
-        // FIREBASE SETUP
+        "use strict";
+
         const firebaseConfig = {
             apiKey: "AIzaSyBDJnlr-VJt3OqvGeCRIzNCUjhLndpvyoQ",
             authDomain: "gtc-fee-portal.firebaseapp.com",
@@ -273,142 +831,109 @@
             appId: "1:861357054407:web:8d1c8a5dce4c3969c361e2",
             measurementId: "G-SJWZFVM3YQ"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const phoneInput = document.getElementById('student-phone');
-            const digitCounter = document.getElementById('phone-digit-count');
+        const phoneInput = document.getElementById('student-phone');
+        const digitCounter = document.getElementById('phone-digit-count');
+        const validTag = document.getElementById('phone-valid-tag');
+        const clearBtn = document.getElementById('clear-phone-btn');
+        const errorBox = document.getElementById('login-error-msg');
+        const errorText = document.getElementById('login-error-text');
+        const resumeCard = document.getElementById('resume-login-card');
+        const resumePhoneLabel = document.getElementById('resume-phone-label');
+        const resumeOpenBtn = document.getElementById('resume-open-btn');
 
-            if (phoneInput) {
-                phoneInput.value = '';
-                if (digitCounter) digitCounter.innerText = '0/10';
-            }
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
-            const syncStatus = document.getElementById('sync-status');
-            const syncScreen = document.getElementById('sync-screen');
+        function syncInputUI() {
+            const val = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+            phoneInput.value = val;
+            digitCounter.textContent = `${val.length} / 10`;
+            digitCounter.style.color = val.length === 10 ? '#059669' : '#64748b';
+            validTag.style.display = val.length === 10 ? 'inline' : 'none';
+            clearBtn.classList.toggle('show', val.length > 0);
+            errorBox.classList.remove('show');
+        }
 
-            if (phoneInput && digitCounter) {
-                phoneInput.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                    digitCounter.innerText = `${e.target.value.length}/10`;
-                    if (e.target.value.length === 10) {
-                        digitCounter.className = "font-mono text-emerald-400 font-bold";
-                    } else {
-                        digitCounter.className = "font-mono text-slate-400";
-                    }
-                });
+        phoneInput.addEventListener('input', syncInputUI);
 
-                phoneInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleStudentLogin();
-                    }
-                });
-            }
-
-            db.ref('gtc_students').once('value').then((snapshot) => {
-                if (!snapshot.exists()) {
-                    const defaultStudent = [{ 
-                        id: "1", 
-                        name: "Darpan Kumari", 
-                        fatherName: "Chandan Sharma", 
-                        phone: "9142754164", 
-                        admissionDate: "2026-01-26", 
-                        monthlyFee: 150, 
-                        paidCycles: 3, 
-                        transactions: [] 
-                    }];
-                    db.ref('gtc_students').set(defaultStudent);
-                }
-                
-                syncStatus.innerHTML = '<span class="text-emerald-400">✓ Live Database Connected</span>';
-                setTimeout(() => {
-                    syncScreen.classList.add('opacity-0');
-                    setTimeout(() => {
-                        syncScreen.style.display = 'none';
-                    }, 300);
-                }, 350);
-            }).catch((error) => {
-                syncStatus.innerText = 'Offline Mode / Check Internet';
-                console.error("Firebase Sync error:", error);
-                setTimeout(() => {
-                    syncScreen.style.display = 'none';
-                }, 900);
-            });
+        clearBtn.addEventListener('click', () => {
+            phoneInput.value = '';
+            syncInputUI();
+            phoneInput.focus();
         });
 
-        function showModal(title, message, isError = true) {
-            const modal = document.getElementById('custom-modal');
-            const modalBox = document.getElementById('modal-box');
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
-            
-            const icon = document.getElementById('modal-icon');
-            if(isError) {
-                icon.className = "w-13 h-13 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4 text-xl font-bold border border-rose-500/30";
-                icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
-            } else {
-                icon.className = "w-13 h-13 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-xl font-bold border border-emerald-500/30";
-                icon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        phoneInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleStudentLogin();
             }
+        });
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalBox.classList.remove('scale-95');
-                modalBox.classList.add('scale-100');
-            }, 10);
+        // Check if student already logged in previously on this browser
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const savedPhone = (localStorage.getItem('studentPhone') || '').replace(/\D/g, '');
+                if (savedPhone.length === 10) {
+                    resumePhoneLabel.textContent = `+91 ${savedPhone}`;
+                    resumeCard.classList.add('show');
+                    resumeOpenBtn.onclick = () => {
+                        window.location.href = 'student.html';
+                    };
+                }
+            } catch (e) {}
+        });
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorBox.classList.add('show');
         }
 
-        function closeModal() {
-            const modal = document.getElementById('custom-modal');
-            const modalBox = document.getElementById('modal-box');
-            modal.classList.add('opacity-0');
-            modalBox.classList.remove('scale-100');
-            modalBox.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
-        // STUDENT LOGIN LOGIC
         function handleStudentLogin() {
-            const phoneInput = document.getElementById('student-phone');
-            const phone = (phoneInput?.value || "").trim();
-            const spinner = document.getElementById('student-spinner');
-            const btnText = document.getElementById('btn-student-text');
+            const phone = (phoneInput.value || "").trim();
             const btn = document.getElementById('btn-student-login');
-            
+            const btnText = document.getElementById('btn-student-text');
+            const btnIcon = document.getElementById('btn-icon');
+            const cloudText = document.getElementById('cloud-status-text');
+
+            errorBox.classList.remove('show');
+
             if (phone.length !== 10) {
-                showModal("अमान्य मोबाइल नंबर", "कृपया अपना 10-अंकों का सही रजिस्टर्ड मोबाइल नंबर दर्ज करें।", true);
-                if (phoneInput) phoneInput.focus();
+                showError("Kripya apna 10-digit ka sahi registered mobile number darj karein.");
+                phoneInput.focus();
                 return;
             }
 
-            if (spinner) spinner.classList.remove('hidden');
-            if (btnText) btnText.innerText = "Verifying...";
-            if (btn) btn.disabled = true;
+            btn.disabled = true;
+            btnIcon.className = "fa-solid fa-circle-notch fa-spin";
+            btnText.textContent = "Verifying Student Record...";
 
             db.ref('gtc_students').once('value').then((snapshot) => {
-                const students = snapshot.val() || [];
-                const student = students.find(s => String(s.phone).trim() === phone);
+                const raw = snapshot.val() || [];
+                const students = (Array.isArray(raw) ? raw : Object.values(raw)).filter(Boolean);
+                const matched = students.find(s =>
+                    s.isDeleted !== true &&
+                    !s.deletedAt &&
+                    String(s.phone || '').trim() === phone
+                );
 
-                if (student) {
+                if (cloudText) cloudText.textContent = "Live Connected";
+
+                if (matched) {
                     localStorage.setItem("studentPhone", phone);
                     window.location.href = "student.html";
                 } else {
-                    showModal(
-                        "नंबर नहीं मिला!", 
-                        "क्षमा करें, यह मोबाइल नंबर हमारे रिकॉर्ड में नहीं मिला। कृपया सही 10-अंकों का नंबर दर्ज करें या गौतम सर (8217598939) से संपर्क करें।",
-                        true
-                    );
+                    showError("Yeh mobile number hamare active student record me nahi mila. Kripya sahi number daalein ya Gautam Sir (+91 8217598939) se sampark karein.");
                 }
-            }).catch((err) => {
-                showModal("नेटवर्क त्रुटि", "डेटाबेस से कनेक्ट करने में समस्या आई। कृपया इंटरनेट कनेक्शन जांचें।", true);
-                console.error(err);
+            }).catch(() => {
+                showError("Database se connect karne me samasya aayi. Kripya apna internet connection check karein.");
             }).finally(() => {
-                if (spinner) spinner.classList.add('hidden');
-                if (btnText) btnText.innerText = "Check Dues & Receipts";
-                if (btn) btn.disabled = false;
+                btn.disabled = false;
+                btnIcon.className = "fa-solid fa-magnifying-glass";
+                btnText.textContent = "Check Fee Dues & Receipts";
             });
         }
     </script>
