@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- FORCE DESKTOP MODE ON MOBILE & TABLET -->
-    <meta id="gtc-desktop-viewport" name="viewport" content="width=1220, initial-scale=0.33, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes">
+    <!-- FORCE DESKTOP MODE ON MOBILE & TABLET (820px = Big & Clear Desktop View) -->
+    <meta id="gtc-desktop-viewport" name="viewport" content="width=820, initial-scale=0.48, minimum-scale=0.3, maximum-scale=3.0, user-scalable=yes">
     <meta name="theme-color" content="#0f172a">
     <title>Gautam Teaching Center | Student Fee Portal (Desktop View)</title>
 
     <!-- STRICT ROUTE GUARD + FORCE DESKTOP VIEWPORT SCRIPT -->
     <script>
         (function enforceIndexFirstAndDesktopMode() {
-            // 1. Force Desktop Mode scaling on mobile phones
+            // 1. Force Desktop Mode scaling on mobile phones (820px width keeps desktop layout big & readable)
             try {
                 var vp = document.getElementById('gtc-desktop-viewport');
                 var screenW = Math.min(window.screen.width || 390, window.innerWidth || 390);
-                if (vp && screenW > 0 && screenW < 1220) {
-                    var scale = Math.max(0.25, Math.min(1, +(screenW / 1220).toFixed(3)));
-                    vp.setAttribute('content', 'width=1220, initial-scale=' + scale + ', minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes');
+                if (vp && screenW > 0 && screenW < 820) {
+                    var scale = Math.max(0.35, Math.min(1, +(screenW / 820).toFixed(3)));
+                    vp.setAttribute('content', 'width=820, initial-scale=' + scale + ', minimum-scale=0.3, maximum-scale=3.0, user-scalable=yes');
                 }
             } catch (e) {}
 
@@ -94,8 +94,9 @@
         }
 
         html, body {
-            min-width: 1220px;
+            min-width: 820px;
             min-height: 100vh;
+            font-size: 16px;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-primary);
