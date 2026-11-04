@@ -764,7 +764,10 @@
                                     <div>Father: <strong id="profile-father">-</strong></div>
                                     <div>Mobile: <strong id="profile-phone">-</strong></div>
                                     <div>Admission: <strong id="profile-admission">-</strong></div>
-                                    <div>Monthly Fee: <strong style="color:var(--primary);">₹<span id="profile-fee">150</span>/mo</strong></div>
+                                    <div>
+                                        Monthly Fee: <strong style="color:var(--primary);">₹<span id="profile-fee">150</span>/mo</strong>
+                                        <span id="profile-fee-rev-note" style="font-size:10.5px;color:var(--amber);font-weight:800;display:block;margin-top:1px;"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1221,8 +1224,8 @@
         }
 
         // ============================================================================
-        // 3. UNIFIED FINANCIAL & 12-CYCLE ENGINE (100% Matched with Teacher Dashboard)
-        //    Fixes ₹2,000 vs ₹2,100 bug: Transactions are the single source of truth!
+        // 3. UNIFIED FINANCIAL, PER-CYCLE FEE REVISION & 12-CYCLE ENGINE
+        //    (100% Synced with Teacher Command Dashboard)
         // ============================================================================
         function parseAdmissionDateParts(dateStr) {
             if (!dateStr || typeof dateStr !== "string") return { year: 2026, month: 0, day: 1 };
@@ -1240,6 +1243,11 @@
                 if (year < 100) year += 2000;
             }
             return { year, month, day };
+        }
+
+        function getStartYearFromSession(sessionStr) {
+            if (!sessionStr || !sessionStr.includes('-')) return 2026;
+            return parseInt(sessionStr.split('-')[0], 10) || 2026;
         }
 
         function formatDate(date) {
@@ -1262,7 +1270,8 @@
             const admSession = getStudentAdmissionSession(student);
             const startIdx = SESSIONS_LIST.indexOf(admSession);
             if (startIdx >= 0) return SESSIONS_LIST.slice(startIdx);
-            return SESSIONS_LIST;
+            const admYear = getStartYearFromSession(admSession);
+            return [admSession, ...SESSIONS_LIST.filter(s => getStartYearFromSession(s) > admYear)];
         }
 
         const cyclesCache = new Map();
@@ -1272,7 +1281,7 @@
             if (cyclesCache.has(cacheKey)) return cyclesCache.get(cacheKey);
 
             const { year: admissionYear, month, day } = parseAdmissionDateParts(admissionDateStr);
-            const sessionStartYear = parseInt(String(sessionStr || '').split('-')[0], 10) || admissionYear;
+            const sessionStartYear = getStartYearFromSession(sessionStr);
             const actualAdmissionDate = new Date(admissionYear, month, day, 0, 0, 0, 0);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -1302,15 +1311,94 @@
         }
 
         /**
+         * Dynamic Per-Cycle Fee Resolver (Synced with Teacher Dashboard):
+         * Past cycles before a fee revision stay at the base/old fee (e.g. ₹150),
+         * while cycles from `(rev.session, rev.fromCycle)` onwards use `rev.amount` (e.g. ₹200).
+         */
+        function getSortedFeeRevisions(student) {
+            if (!student || !Array.isArray(student.feeRevisions) || student.feeRevisions.length === 0) {
+                return [];
+            }
+            return student.feeRevisions
+                .filter(r => r && r.session && Number(r.amount) > 0)
+                .slice()
+                .sort((a, b) => {
+                    const yDiff = getStartYearFromSession(a.session) - getStartYearFromSession(b.session);
+                    if (yDiff !== 0) return yDiff;
+                    return (parseInt(a.fromCycle, 10) || 1) - (parseInt(b.fromCycle, 10) || 1);
+                });
+        }
+
+        function getBaseFeeForStudent(student) {
+            const fallbackFee = Math.max(1, parseInt(student?.monthlyFee, 10) || 150);
+            if (student && Number(student.baseMonthlyFee) > 0) {
+                return Math.max(1, parseInt(student.baseMonthlyFee, 10));
+            }
+            const revs = getSortedFeeRevisions(student);
+            if (revs.length > 0 && Number(revs[0].previousAmount) > 0) {
+                return Math.max(1, parseInt(revs[0].previousAmount, 10));
+            }
+            return fallbackFee;
+        }
+
+        function getCycleFeeForStudent(student, sessionStr, cycleNumber) {
+            const revs = getSortedFeeRevisions(student);
+            if (revs.length === 0) {
+                return Math.max(1, parseInt(student?.monthlyFee, 10) || 150);
+            }
+            let rate = getBaseFeeForStudent(student);
+            const targetYear = getStartYearFromSession(sessionStr);
+            const targetCycle = parseInt(cycleNumber, 10) || 1;
+
+            for (let i = 0; i < revs.length; i++) {
+                const r = revs[i];
+                const revYear = getStartYearFromSession(r.session);
+                const revCycle = parseInt(r.fromCycle, 10) || 1;
+                if (targetYear > revYear || (targetYear === revYear && targetCycle >= revCycle)) {
+                    rate = Math.max(1, parseInt(r.amount, 10) || rate);
+                }
+            }
+            return rate;
+        }
+
+        function getSession12CyclesWithFee(student, sessionStr) {
+            const baseCycles = generateSession12Cycles(student?.admissionDate, sessionStr);
+            return baseCycles.map((c, idx) => ({
+                ...c,
+                cycleFee: getCycleFeeForStudent(student, sessionStr, idx + 1)
+            }));
+        }
+
+        function getFullCyclesFromCreditedAmount(student, sessionStr, totalCreditedAmount) {
+            const cycles12 = getSession12CyclesWithFee(student, sessionStr);
+            let rem = Math.max(0, parseInt(totalCreditedAmount, 10) || 0);
+            let fullCycles = 0;
+            for (let i = 0; i < 12; i++) {
+                const cFee = cycles12[i].cycleFee;
+                if (rem >= cFee) {
+                    rem -= cFee;
+                    fullCycles++;
+                } else {
+                    break;
+                }
+            }
+            return {
+                fullCycles,
+                partialRem: fullCycles < 12 ? rem : 0,
+                cycles12
+            };
+        }
+
+        /**
          * Exact Financial Engine (Identical to Teacher Dashboard):
-         * - If `transactions.length > 0`, `creditedAmount` is ALWAYS the exact sum of `tx.amount`.
-         *   It NEVER uses `Math.max(transactionAmount, paidCycles * fee)`.
+         * - Supports Per-Cycle Fee Revisions (`feeRevisions`, `baseMonthlyFee`)
+         * - Past completed cycles keep their old rate (e.g. ₹150) while revised cycles use the new rate (e.g. ₹200).
          */
         function computeStudentFinancials(s) {
-            const admDateStr = s.admissionDate || "2026-01-01";
             const admSession = getStudentAdmissionSession(s);
             const admSessionIdx = Math.max(0, SESSIONS_LIST.indexOf(admSession));
-            const monthlyFee = Math.max(1, parseInt(s.monthlyFee, 10) || 150);
+            const sortedRevs = getSortedFeeRevisions(s);
+            const baseFee = getBaseFeeForStudent(s);
 
             const txs = Array.isArray(s.transactions) ? s.transactions.filter(Boolean) : [];
             const hasTransactions = txs.length > 0;
@@ -1336,15 +1424,17 @@
                 let carryOver = 0;
                 for (let i = admSessionIdx; i < SESSIONS_LIST.length; i++) {
                     const sess = SESSIONS_LIST[i];
+                    const cycles12 = getSession12CyclesWithFee(s, sess);
+                    const maxSessionFee = cycles12.reduce((sum, c) => sum + c.cycleFee, 0);
+
                     const availableAmt = (sessionCreditedMap[sess] || 0) + carryOver;
-                    const maxSessionFee = 12 * monthlyFee;
                     const usedInSession = Math.min(maxSessionFee, availableAmt);
                     carryOver = Math.max(0, availableAmt - maxSessionFee);
 
                     sessionCreditedMap[sess] = usedInSession + (i === SESSIONS_LIST.length - 1 ? carryOver : 0);
-                    const fullCycles = Math.min(12, Math.floor(sessionCreditedMap[sess] / monthlyFee));
+                    const { fullCycles, partialRem } = getFullCyclesFromCreditedAmount(s, sess, sessionCreditedMap[sess]);
                     sessionPaidCyclesMap[sess] = fullCycles;
-                    sessionPartialMap[sess] = fullCycles < 12 ? (sessionCreditedMap[sess] % monthlyFee) : 0;
+                    sessionPartialMap[sess] = partialRem;
                 }
             } else {
                 let remLegacy = parseInt(s.paidCycles, 10) || 0;
@@ -1353,6 +1443,7 @@
 
                 for (let i = admSessionIdx; i < SESSIONS_LIST.length; i++) {
                     const sess = SESSIONS_LIST[i];
+                    const cycles12 = getSession12CyclesWithFee(s, sess);
                     let cyc = 0;
                     if (rawMap && mapSum > 0) {
                         cyc = Math.max(0, Math.min(12, parseInt(rawMap[sess], 10) || 0));
@@ -1361,7 +1452,7 @@
                         remLegacy -= cyc;
                     }
                     sessionPaidCyclesMap[sess] = cyc;
-                    sessionCreditedMap[sess] = cyc * monthlyFee;
+                    sessionCreditedMap[sess] = cycles12.slice(0, cyc).reduce((sum, c) => sum + c.cycleFee, 0);
                     sessionPartialMap[sess] = 0;
                 }
             }
@@ -1370,14 +1461,17 @@
             now.setHours(23, 59, 59, 999);
             let currentRunningSession = admSession;
             let totalElapsedCycles = 0;
+            let expectedTotalFee = 0;
 
             for (let sIdx = admSessionIdx; sIdx < SESSIONS_LIST.length; sIdx++) {
                 const sessName = SESSIONS_LIST[sIdx];
-                const cycles12 = generateSession12Cycles(admDateStr, sessName);
+                const cycles12 = getSession12CyclesWithFee(s, sessName);
                 let sessionStarted = false;
-                for (const c of cycles12) {
+                for (let cIdx = 0; cIdx < 12; cIdx++) {
+                    const c = cycles12[cIdx];
                     if (c.status !== 'BEFORE_ADMISSION' && c.dueDate <= now) {
                         totalElapsedCycles++;
+                        expectedTotalFee += c.cycleFee;
                         sessionStarted = true;
                     }
                     if (c.status === 'RUNNING') currentRunningSession = sessName;
@@ -1389,18 +1483,25 @@
                 ? txs.reduce((sum, tx) => sum + (parseInt(tx.amount, 10) || 0), 0)
                 : Object.values(sessionCreditedMap).reduce((a, b) => a + b, 0);
 
-            const expectedTotalFee = totalElapsedCycles * monthlyFee;
             const netBalance = expectedTotalFee - totalPaidSoFar;
+
+            // Current active monthly fee for display (always reflects latest revised fee when feeRevisions exist)
+            const effectiveMonthlyFee = sortedRevs.length > 0
+                ? (parseInt(sortedRevs[sortedRevs.length - 1].amount, 10) || Math.max(1, parseInt(s.monthlyFee, 10) || 150))
+                : (Math.max(1, parseInt(s.monthlyFee, 10) || 150));
 
             return {
                 ...s,
-                monthlyFee,
+                monthlyFee: effectiveMonthlyFee,
+                baseMonthlyFee: baseFee,
+                feeRevisions: sortedRevs,
                 sessionPaid: sessionPaidCyclesMap,
                 _sessionCredited: sessionCreditedMap,
                 _sessionPartial: sessionPartialMap,
                 _admSession: admSession,
                 _activeSession: currentRunningSession,
                 _totalElapsedCycles: totalElapsedCycles,
+                _expectedTotalFee: expectedTotalFee,
                 _netBalance: netBalance,
                 _totalPaid: totalPaidSoFar,
                 _rollId: "GTC-" + (s.id ? String(s.id).slice(-5) : "00000")
@@ -1408,26 +1509,34 @@
         }
 
         function getStudentSessionLedger(student, sessionStr) {
-            const fee = parseInt(student?.monthlyFee, 10) || 150;
-            const cycles = generateSession12Cycles(student?.admissionDate || '2026-01-01', sessionStr);
+            const cycles = getSession12CyclesWithFee(student, sessionStr);
             const today = new Date();
             today.setHours(23, 59, 59, 999);
 
             const eligibleCycles = cycles.filter(c => c.status !== 'BEFORE_ADMISSION');
-            const expectedCycles = eligibleCycles.filter(c => c.dueDate <= today).length;
+            const elapsedList = eligibleCycles.filter(c => c.dueDate <= today);
+            const expectedCycles = elapsedList.length;
+            const expectedAmount = elapsedList.reduce((sum, c) => sum + c.cycleFee, 0);
+            const totalSessionFee = cycles.reduce((sum, c) => sum + c.cycleFee, 0);
+
             const paidCycles = Math.max(0, Math.min(12, parseInt(student.sessionPaid?.[sessionStr], 10) || 0));
             const partialCredit = parseInt(student._sessionPartial?.[sessionStr], 10) || 0;
             const creditedAmount = parseInt(student._sessionCredited?.[sessionStr], 10) || 0;
-            const expectedAmount = expectedCycles * fee;
             const balance = expectedAmount - creditedAmount;
             const nextCycle = eligibleCycles.find(c => c.dueDate > today);
+
+            // Effective fee in this session: shows the revised/latest rate active in this session (e.g. ₹200)
+            const currentSessionFee = (student.feeRevisions && student.feeRevisions.length > 0)
+                ? (cycles[11] ? cycles[11].cycleFee : (parseInt(student.monthlyFee, 10) || 150))
+                : (parseInt(student.monthlyFee, 10) || 150);
 
             const admissionSession = getStudentAdmissionSession(student);
             const allTransactions = Array.isArray(student?.transactions) ? student.transactions.filter(Boolean) : [];
             const sessionTransactions = allTransactions.filter(tx => (tx.session || admissionSession) === sessionStr);
 
             return {
-                fee,
+                fee: currentSessionFee,
+                totalSessionFee,
                 cycles,
                 expectedCycles,
                 paidCycles,
@@ -1552,6 +1661,17 @@
             document.getElementById('profile-fee').textContent = student.monthlyFee || 150;
             document.getElementById('profile-admission').textContent = `${student.admissionDate || '-'} (${student._admSession})`;
 
+            const revNoteEl = document.getElementById('profile-fee-rev-note');
+            const revs = student.feeRevisions || [];
+            if (revNoteEl) {
+                if (revs.length > 0) {
+                    const lastRev = revs[revs.length - 1];
+                    revNoteEl.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> From Cycle ${lastRev.fromCycle} (Old: ₹${student.baseMonthlyFee}/mo)`;
+                } else {
+                    revNoteEl.textContent = "";
+                }
+            }
+
             const avatarImg = document.getElementById('student-avatar-img');
             const avatarText = document.getElementById('student-avatar-text');
             if (student.avatar) {
@@ -1589,13 +1709,15 @@
 
             document.getElementById('header-session-label').textContent = `• Session ${sessionStr}`;
             document.getElementById('session-tracker-badge').textContent = `SESSION ${sessionStr}`;
+            document.getElementById('profile-fee').textContent = ledger.fee || student.monthlyFee || 150;
 
             const cycBadgeText = ledger.partialCredit > 0
                 ? `${paidCount} / 12 Full Cycles Paid (+₹${ledger.partialCredit} partial)`
                 : `${paidCount} / 12 Cycles Paid`;
             document.getElementById('profile-cycles-badge').textContent = cycBadgeText;
 
-            const progressPercent = Math.min(100, Math.round((ledger.creditedAmount / (12 * ledger.fee)) * 100));
+            const denom = Math.max(1, ledger.totalSessionFee || (12 * ledger.fee));
+            const progressPercent = Math.min(100, Math.round((ledger.creditedAmount / denom) * 100));
             document.getElementById('cycle-percentage-text').textContent = `${progressPercent}%`;
             document.getElementById('cycle-progress-bar').style.width = `${progressPercent}%`;
 
@@ -1641,13 +1763,14 @@
             today.setHours(23, 59, 59, 999);
 
             grid.innerHTML = cycles.map((cycle, index) => {
+                const cFee = cycle.cycleFee || ledger.fee;
                 const isBefore = cycle.status === 'BEFORE_ADMISSION';
                 const isPaid = !isBefore && index < paidCount;
                 const isPartial = !isBefore && index === paidCount && ledger.partialCredit > 0;
                 const isDue = !isBefore && cycle.dueDate <= today;
 
                 let cls = "cycle-card";
-                let badge = `<span class="badge" style="background:var(--bg-muted);color:var(--text-muted);">Due ${cycle.dueDateLabel}</span>`;
+                let badge = `<span class="badge" style="background:var(--bg-muted);color:var(--text-muted);">₹${cFee} • Due ${cycle.dueDateLabel}</span>`;
                 let icon = `<i class="fa-regular fa-clock" style="color:var(--text-muted);"></i>`;
 
                 if (isBefore) {
@@ -1655,20 +1778,20 @@
                     badge = `<span class="badge" style="background:var(--bg-muted);color:var(--text-muted);">BEFORE ADM</span>`;
                 } else if (isPaid) {
                     cls += " paid";
-                    badge = `<span class="badge badge-adv">✓ PAID (₹${ledger.fee})</span>`;
+                    badge = `<span class="badge badge-adv">✓ PAID (₹${cFee})</span>`;
                     icon = `<i class="fa-solid fa-circle-check" style="color:var(--emerald);"></i>`;
                 } else if (isPartial) {
                     cls += " partial";
-                    const rem = ledger.fee - ledger.partialCredit;
-                    badge = `<span class="badge badge-amber">₹${ledger.partialCredit} PAID • ₹${rem} LEFT</span>`;
+                    const rem = Math.max(0, cFee - ledger.partialCredit);
+                    badge = `<span class="badge badge-amber">₹${ledger.partialCredit}/₹${cFee} PAID • ₹${rem} LEFT</span>`;
                     icon = `<i class="fa-solid fa-coins" style="color:var(--amber);"></i>`;
                 } else if (isDue) {
                     cls += " due";
-                    badge = `<span class="badge badge-due">⚠ DUE (₹${ledger.fee})</span>`;
+                    badge = `<span class="badge badge-due">⚠ DUE (₹${cFee})</span>`;
                     icon = `<i class="fa-solid fa-circle-exclamation" style="color:var(--rose);"></i>`;
                 } else if (cycle.status === 'RUNNING') {
                     cls += " running";
-                    badge = `<span class="badge badge-clear">⚡ RUNNING • Due ${cycle.dueDateLabel}</span>`;
+                    badge = `<span class="badge badge-clear">⚡ RUNNING (₹${cFee}) • Due ${cycle.dueDateLabel}</span>`;
                     icon = `<i class="fa-solid fa-bolt" style="color:var(--cyan);"></i>`;
                 }
 
